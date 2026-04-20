@@ -18,6 +18,8 @@ import AdminRegelingenBeheer from "./pages/admin/RegelingenBeheer.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
+import OnboardingPlan from "./pages/onboarding/OnboardingPlan.jsx";
+import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess.jsx";
 import Abonnement from "./pages/installateur/Abonnement.jsx";
 import DossierDetail from "./pages/installateur/DossierDetail.jsx";
 import DossiersOverzicht from "./pages/installateur/DossiersOverzicht.jsx";
@@ -38,6 +40,8 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/aanvraag/nieuw" element={<NieuweAanvraag />} />
           <Route path="/aanvraag/:id" element={<AanvraagDetail />} />
+          <Route path="/onboarding/plan" element={<OnboardingPlan />} />
+          <Route path="/onboarding/success" element={<OnboardingSuccess />} />
         </Route>
 
         <Route element={<AdminRoute />}>

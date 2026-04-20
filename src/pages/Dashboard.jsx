@@ -19,6 +19,34 @@ function greeting() {
   return "Goedenavond";
 }
 
+const PLAN_LABELS = {
+  gratis: "Gratis",
+  starter: "Starter",
+  pro: "Pro",
+  enterprise: "Enterprise",
+};
+
+function PlanBadge({ plan, status }) {
+  const label = PLAN_LABELS[plan] || plan;
+  const pending = status === "pending";
+  const cancelled = status === "cancelled" || status === "canceled";
+  const tone = pending
+    ? "bg-amber-50 text-amber-800 border-amber-200"
+    : cancelled
+    ? "bg-gray-100 text-gray-700 border-gray-200"
+    : "bg-brand-greenLight text-brand-greenDark border-brand-green/30";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${tone}`}
+      title={`Abonnement: ${label} (${status})`}
+    >
+      Abonnement: {label}
+      {pending && <span className="opacity-70">· wordt geactiveerd</span>}
+      {cancelled && <span className="opacity-70">· opgezegd</span>}
+    </span>
+  );
+}
+
 function Kpi({ label, value, sublabel }) {
   return (
     <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -123,6 +151,8 @@ export default function Dashboard() {
   }
 
   const firstName = me?.user?.first_name || "";
+  const plan = me?.user?.subscription_plan || "gratis";
+  const subStatus = me?.user?.subscription_status || "active";
 
   return (
     <div className="container-app py-8 sm:py-10">
@@ -132,11 +162,10 @@ export default function Dashboard() {
             {greeting()}
             {firstName ? `, ${firstName}` : ""}
           </h1>
-          {me?.organisation?.name && (
-            <p className="mt-1 text-sm text-gray-600">
-              {me.organisation.name}
-            </p>
-          )}
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
+            {me?.organisation?.name && <span>{me.organisation.name}</span>}
+            <PlanBadge plan={plan} status={subStatus} />
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/subsidiecheck" className="btn-secondary">
@@ -147,6 +176,21 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
+
+      {plan === "gratis" && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-green/30 bg-brand-greenLight px-4 py-3 text-sm text-brand-greenDark">
+          <span>
+            <strong className="font-semibold">U gebruikt het Gratis plan.</strong>{" "}
+            Upgrade voor meer panden en extra functies.
+          </span>
+          <Link
+            to="/onboarding/plan"
+            className="font-semibold text-brand-green hover:underline"
+          >
+            Bekijk plannen →
+          </Link>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi

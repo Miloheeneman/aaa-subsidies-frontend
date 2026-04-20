@@ -2,11 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { api, apiErrorMessage } from "../../lib/api.js";
+import { isLoggedIn } from "../../lib/auth.js";
 import AuthShell, { FormError, FormSuccess } from "./AuthShell.jsx";
 
 export default function VerifyEmail() {
   const { token } = useParams();
-  const [state, setState] = useState({ loading: true, error: null, message: null });
+  const [state, setState] = useState({
+    loading: true,
+    error: null,
+    message: null,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +39,15 @@ export default function VerifyEmail() {
     };
   }, [token]);
 
+  // After successful verification the user still needs to be logged in
+  // before they can land on /onboarding/plan (which is a protected
+  // route). We send them via /login?next=/onboarding/plan so the
+  // existing login flow takes them straight to the plan picker.
+  const nextUrl = "/onboarding/plan";
+  const loginUrl = isLoggedIn()
+    ? nextUrl
+    : `/login?next=${encodeURIComponent(nextUrl)}`;
+
   return (
     <AuthShell title="E-mail verifiëren">
       {state.loading ? (
@@ -57,8 +71,12 @@ export default function VerifyEmail() {
       ) : (
         <div className="grid gap-4">
           <FormSuccess>{state.message}</FormSuccess>
-          <Link to="/login" className="btn-primary text-center">
-            Inloggen
+          <p className="text-sm text-gray-600">
+            Top! U wordt zo doorgestuurd naar het abonnementsscherm zodat u
+            kunt kiezen hoe u wilt starten.
+          </p>
+          <Link to={loginUrl} className="btn-primary text-center">
+            Kies uw abonnement
           </Link>
         </div>
       )}
