@@ -2,7 +2,31 @@ import axios from "axios";
 
 import { getToken, removeToken } from "./auth.js";
 
-const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
+/**
+ * Build the axios baseURL from VITE_API_URL, tolerating any of these
+ * user-supplied values so a misconfigured env var on Vercel doesn't
+ * silently 404 every request (as happened on the first deploy):
+ *
+ *   https://api.example.com
+ *   https://api.example.com/
+ *   https://api.example.com/api/v1
+ *   https://api.example.com/api/v1/
+ *
+ * All four normalize to `https://api.example.com/api/v1`. When the env
+ * var is absent (local `npm run dev`), we fall back to `/api/v1` and
+ * rely on the Vite dev proxy.
+ */
+function resolveBaseUrl() {
+  const raw = import.meta.env.VITE_API_URL;
+  if (!raw) return "/api/v1";
+  let trimmed = String(raw).trim().replace(/\/+$/, "");
+  if (!trimmed.endsWith("/api/v1")) {
+    trimmed = `${trimmed}/api/v1`;
+  }
+  return trimmed;
+}
+
+const baseURL = resolveBaseUrl();
 
 export const api = axios.create({
   baseURL,
