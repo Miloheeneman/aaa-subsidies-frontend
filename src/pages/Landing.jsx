@@ -1,62 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import PageMeta from "../components/PageMeta.jsx";
-
-/**
- * Kleine wrapper die children laat infaden zodra het element in-view komt.
- * Werkt met één IntersectionObserver per instance en disconnect na de eerste
- * reveal, zodat we geen verdere re-renders triggeren.
- * `prefers-reduced-motion: reduce` wordt via CSS gerespecteerd.
- */
-function Reveal({
-  as: Tag = "div",
-  className = "",
-  delay = 0,
-  children,
-  ...rest
-}) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-
-    // Direct tonen wanneer IntersectionObserver ontbreekt (oude browsers /
-    // SSR) zodat we nooit met een lege pagina eindigen.
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return undefined;
-    }
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            io.disconnect();
-            break;
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  return (
-    <Tag
-      ref={ref}
-      className={`reveal ${visible ? "is-visible" : ""} ${className}`.trim()}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-      {...rest}
-    >
-      {children}
-    </Tag>
-  );
-}
+import Reveal from "../components/Reveal.jsx";
 
 const regelingen = [
   {

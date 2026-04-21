@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import PageMeta from "../components/PageMeta.jsx";
+import Reveal from "../components/Reveal.jsx";
 
 const fases = [
   {
@@ -119,7 +120,7 @@ const faqItems = [
 function FaseCard({ fase }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl p-6 shadow-sm ring-1 ring-black/5 sm:p-8 ${fase.bg}`}
+      className={`relative h-full overflow-hidden rounded-2xl p-6 shadow-sm ring-1 ring-black/5 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:ring-2 hover:ring-brand-green sm:p-8 ${fase.bg}`}
     >
       <div className="flex items-center gap-3">
         <span
@@ -175,12 +176,12 @@ function FaseCard({ fase }) {
 
 function DocumentAccordion({ item, open, onToggle }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white transition-colors duration-150 ease-out hover:bg-[#f0faf0]">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:text-brand-green"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-150 ease-out hover:text-brand-green"
       >
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center rounded-md bg-brand-green px-2 py-1 text-xs font-bold uppercase tracking-wide text-white">
@@ -243,12 +244,12 @@ function DocumentAccordion({ item, open, onToggle }) {
 
 function FaqItem({ item, open, onToggle }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white transition-colors duration-150 ease-out hover:bg-[#f0faf0]">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-base font-semibold text-gray-900 hover:text-brand-green"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left text-base font-semibold text-gray-900 transition-colors duration-150 ease-out hover:text-brand-green"
       >
         <span>{item.q}</span>
         <span
@@ -282,7 +283,7 @@ export default function HoeHetWerkt() {
 
       <section className="bg-brand-greenLight">
         <div className="container-app py-16 md:py-20">
-          <div className="max-w-3xl">
+          <Reveal className="max-w-3xl">
             <span className="inline-block rounded-full bg-brand-green/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-green">
               Werkwijze
             </span>
@@ -303,12 +304,12 @@ export default function HoeHetWerkt() {
                 Account aanmaken
               </Link>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <section className="container-app py-16">
-        <div className="mb-10 max-w-2xl">
+        <Reveal className="mb-10 max-w-2xl">
           <h2 className="text-3xl font-bold text-gray-900">
             In drie fases naar uw subsidie
           </h2>
@@ -316,17 +317,19 @@ export default function HoeHetWerkt() {
             Elke fase heeft een vast contactmoment. U weet altijd waar uw
             dossier staat.
           </p>
-        </div>
+        </Reveal>
         <div className="grid gap-5 md:grid-cols-3">
-          {fases.map((f) => (
-            <FaseCard key={f.nummer} fase={f} />
+          {fases.map((f, idx) => (
+            <Reveal key={f.nummer} delay={idx * 150}>
+              <FaseCard fase={f} />
+            </Reveal>
           ))}
         </div>
       </section>
 
       <section className="bg-gray-50 py-16">
         <div className="container-app">
-          <div className="mb-10 max-w-2xl">
+          <Reveal className="mb-10 max-w-2xl">
             <h2 className="text-3xl font-bold text-gray-900">
               Wat heeft u nodig per regeling?
             </h2>
@@ -334,44 +337,46 @@ export default function HoeHetWerkt() {
               Klik een regeling open om te zien welke documenten wij van u
               nodig hebben — en waar u op moet letten.
             </p>
-          </div>
+          </Reveal>
           <div className="grid gap-3">
             {documentenPerRegeling.map((item, idx) => (
-              <DocumentAccordion
-                key={item.titel}
-                item={item}
-                open={openDoc === idx}
-                onToggle={() => setOpenDoc(openDoc === idx ? -1 : idx)}
-              />
+              <Reveal key={item.titel} delay={Math.min(idx, 3) * 100}>
+                <DocumentAccordion
+                  item={item}
+                  open={openDoc === idx}
+                  onToggle={() => setOpenDoc(openDoc === idx ? -1 : idx)}
+                />
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       <section className="container-app py-16">
-        <div className="mb-8 max-w-2xl">
+        <Reveal className="mb-8 max-w-2xl">
           <h2 className="text-3xl font-bold text-gray-900">
             Veelgestelde vragen
           </h2>
           <p className="mt-3 text-gray-600">
             Nog iets onduidelijk? Onze adviseurs staan voor u klaar.
           </p>
-        </div>
+        </Reveal>
         <div className="grid gap-3">
           {faqItems.map((item, idx) => (
-            <FaqItem
-              key={item.q}
-              item={item}
-              open={openFaq === idx}
-              onToggle={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-            />
+            <Reveal key={item.q} delay={Math.min(idx, 3) * 100}>
+              <FaqItem
+                item={item}
+                open={openFaq === idx}
+                onToggle={() => setOpenFaq(openFaq === idx ? -1 : idx)}
+              />
+            </Reveal>
           ))}
         </div>
       </section>
 
       <section className="bg-brand-greenLight py-14">
         <div className="container-app flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <div>
+          <Reveal>
             <h2 className="text-2xl font-bold text-gray-900">
               Start vrijblijvend met de subsidiecheck
             </h2>
@@ -379,15 +384,15 @@ export default function HoeHetWerkt() {
               In 5 minuten weet u welke regelingen op uw situatie van
               toepassing zijn.
             </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
+          </Reveal>
+          <Reveal delay={120} className="flex flex-wrap gap-3">
             <Link to="/subsidiecheck" className="btn-primary">
               Gratis subsidiecheck
             </Link>
             <Link to="/register" className="btn-secondary">
               Account aanmaken
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
     </div>
