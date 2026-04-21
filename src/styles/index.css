@@ -27,3 +27,89 @@
     @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 disabled:bg-gray-100 disabled:text-gray-500;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Landing-page animaties
+ * Alle animaties respecteren `prefers-reduced-motion` (zie onderaan).
+ * ------------------------------------------------------------------------- */
+@layer utilities {
+  /* Fade-up voor sectie-reveals */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Hero achtergrond: langzame groene gradient-shift */
+  @keyframes hero-gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  .hero-animated-bg {
+    background: linear-gradient(120deg, #e8f5e8 0%, #d4edda 50%, #e8f5e8 100%);
+    background-size: 200% 200%;
+    animation: hero-gradient-shift 8s ease-in-out infinite;
+  }
+
+  /* Drijvende hero-decoraties */
+  @keyframes hero-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(8px, -14px, 0);
+    }
+  }
+  .hero-float-a {
+    animation: hero-float 9s ease-in-out infinite;
+  }
+  .hero-float-b {
+    animation: hero-float 12s ease-in-out infinite reverse;
+  }
+  .hero-float-c {
+    animation: hero-float 14s ease-in-out infinite;
+    animation-delay: -3s;
+  }
+
+  /* CTA pulse */
+  @keyframes cta-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(45, 106, 45, 0.35);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(45, 106, 45, 0);
+    }
+  }
+  .anim-cta-pulse {
+    animation: cta-pulse 2s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .hero-animated-bg,
+  .hero-float-a,
+  .hero-float-b,
+  .hero-float-c,
+  .anim-cta-pulse {
+    animation: none !important;
+  }
+}
