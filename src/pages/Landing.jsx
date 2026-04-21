@@ -65,24 +65,6 @@ const trustItems = [
   },
 ];
 
-const werkwijzeStappen = [
-  {
-    nummer: "01",
-    titel: "Onderzoeken",
-    body: "Gratis subsidiescan — wij brengen uw kansen in kaart. U ontvangt een indicatieve analyse van de regelingen die op uw situatie van toepassing zijn.",
-  },
-  {
-    nummer: "02",
-    titel: "Aanvragen",
-    body: "Wij bouwen het dossier op en dienen in bij RVO namens u als erkend intermediair. Alle deadlines en indientermijnen bewaken wij automatisch.",
-  },
-  {
-    nummer: "03",
-    titel: "Verantwoorden",
-    body: "Wij monitoren het proces na indiening. Bij goedkeuring ontvangt u de subsidie; AAA-Lex ontvangt dan pas de succesfee.",
-  },
-];
-
 const doelgroepen = [
   {
     icon: "🏠",
@@ -292,48 +274,6 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-gray-50 py-16">
-        <div className="container-app">
-          <div className="mb-10 max-w-2xl">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Subsidie zonder zorgen — wij regelen het
-            </h2>
-            <p className="mt-3 text-gray-600">
-              In drie fases van scan tot uitbetaling. U levert de documenten,
-              AAA-Lex bouwt en dient het dossier in.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {werkwijzeStappen.map((s) => (
-              <div
-                key={s.nummer}
-                className="relative rounded-xl bg-white p-6 ring-1 ring-black/5"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand-green text-sm font-extrabold tracking-wide text-white">
-                    {s.nummer}
-                  </span>
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {s.titel}
-                  </h3>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-gray-700">
-                  {s.body}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8">
-            <Link
-              to="/hoe-het-werkt"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:underline"
-            >
-              Bekijk de volledige werkwijze →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <section className="container-app py-16">
         <div className="mb-10 max-w-2xl">
           <h2 className="text-3xl font-bold text-gray-900">
@@ -376,7 +316,7 @@ export default function Landing() {
         <div className="container-app">
           <div className="mb-12 max-w-2xl">
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
-              Van scan tot uitbetaling — wij regelen het
+              Van scan tot uitbetaling
             </h2>
             <p className="mt-3 text-gray-600">
               Drie stappen, geen verrassingen, geen kosten vooraf.
