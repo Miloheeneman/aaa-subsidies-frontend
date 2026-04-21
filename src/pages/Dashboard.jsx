@@ -2,20 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import StatusBadge, { RegelingBadge } from "../components/StatusBadge.jsx";
-import {
-  DeadlineBadge,
+import DeadlineBadge, {
   EnergielabelBadge,
-} from "../components/panden/PandBadges.jsx";
+} from "../components/panden/DeadlineBadge.jsx";
 import { api, apiErrorMessage } from "../lib/api.js";
 import { setCachedMe } from "../lib/auth.js";
 import {
-  daysUntil,
   formatDate,
   formatEuro,
+  daysUntil,
   maatregelLabel,
-  pandTypeLabel,
 } from "../lib/formatters.js";
-import { listPanden } from "../lib/pandenApi.js";
+import { listPanden, pandTypeLabel } from "../lib/panden.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -95,6 +93,7 @@ export default function Dashboard() {
   const [me, setMe] = useState(null);
   const [aanvragen, setAanvragen] = useState([]);
   const [panden, setPanden] = useState([]);
+  const [pandenQuota, setPandenQuota] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -103,14 +102,15 @@ export default function Dashboard() {
     Promise.all([
       api.get("/auth/me"),
       api.get("/aanvragen"),
-      listPanden().catch(() => []),
+      listPanden().catch(() => ({ items: [], quota: null })),
     ])
-      .then(([meRes, aanRes, pandenData]) => {
+      .then(([meRes, aanRes, pandRes]) => {
         if (cancelled) return;
         setMe(meRes.data);
         setCachedMe(meRes.data);
         setAanvragen(aanRes.data ?? []);
-        setPanden(pandenData ?? []);
+        setPanden(pandRes.items ?? []);
+        setPandenQuota(pandRes.quota ?? null);
         setLoading(false);
       })
       .catch((err) => {
@@ -225,69 +225,66 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 p-5">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Mijn Panden</h2>
-            <p className="text-xs text-gray-500">
-              Beheer uw vastgoed en voeg maatregelen toe per pand.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-gray-100 p-5">
+          <h2 className="text-lg font-bold text-gray-900">Mijn panden</h2>
+          <div className="flex items-center gap-3 text-sm">
+            {pandenQuota && (
+              <span className="hidden text-xs text-gray-500 sm:inline">
+                {pandenQuota.used}
+                {pandenQuota.limit !== null && ` / ${pandenQuota.limit}`} panden
+              </span>
+            )}
             <Link
               to="/panden"
-              className="text-sm font-semibold text-brand-green hover:underline"
+              className="font-semibold text-brand-green hover:underline"
             >
-              Alle panden →
-            </Link>
-            <Link
-              to="/panden/nieuw"
-              className="btn-primary !py-2 !px-4 text-sm"
-            >
-              + Nieuw pand
+              Alles →
             </Link>
           </div>
         </div>
         {panden.length === 0 ? (
-          <div className="grid place-items-center gap-3 px-5 py-10 text-center">
-            <div className="text-4xl" aria-hidden>
+          <div className="grid place-items-center gap-4 px-5 py-10 text-center">
+            <div className="text-5xl" aria-hidden>
               🏠
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">
+              <h3 className="text-lg font-bold text-gray-900">
                 U heeft nog geen panden
               </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Voeg uw eerste pand toe om subsidiekansen te ontdekken.
+              <p className="mt-1 max-w-md text-sm text-gray-600">
+                Voeg uw eerste pand toe om maatregelen en subsidiekansen
+                per pand te registreren.
               </p>
             </div>
             <Link to="/panden/nieuw" className="btn-primary">
-              Voeg eerste pand toe
+              + Pand toevoegen
             </Link>
           </div>
         ) : (
-          <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
-            {panden.slice(0, 6).map((p) => (
-              <Link
-                key={p.id}
-                to={`/panden/${p.id}`}
-                className="flex items-start justify-between gap-3 rounded-lg border border-gray-100 p-3 transition hover:border-brand-green/40"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-bold text-gray-900">
-                    {p.straat} {p.huisnummer}
+          <ul className="divide-y divide-gray-100">
+            {panden.slice(0, 4).map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
+                <EnergielabelBadge label={p.energielabel_huidig} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold text-gray-900">
+                    {p.straat} {p.huisnummer}, {p.plaats}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {pandTypeLabel(p.pand_type)} · {p.maatregelen_count}{" "}
-                    {p.maatregelen_count === 1 ? "maatregel" : "maatregelen"}
-                  </div>
-                  <div className="mt-2">
-                    <DeadlineBadge status={p.deadline_status} compact />
+                    {pandTypeLabel(p.pand_type)} · Bouwjaar {p.bouwjaar} ·{" "}
+                    {p.aantal_maatregelen} maatregel
+                    {p.aantal_maatregelen === 1 ? "" : "en"}
                   </div>
                 </div>
-                <EnergielabelBadge label={p.energielabel_huidig} size="sm" />
-              </Link>
+                <DeadlineBadge status={p.worst_deadline_status} />
+                <Link
+                  to={`/panden/${p.id}`}
+                  className="text-sm font-semibold text-brand-green hover:underline"
+                >
+                  Bekijken →
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
 

@@ -1,92 +1,83 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-import {
-  DeadlineBadge,
+import { RegelingBadge } from "../../components/StatusBadge.jsx";
+import DeadlineBadge, {
   EnergielabelBadge,
-  MaatregelStatusBadge,
-  RegelingPandBadge,
-} from "../../components/panden/PandBadges.jsx";
-import NieuweMaatregelModal from "../../components/panden/NieuweMaatregelModal.jsx";
+} from "../../components/panden/DeadlineBadge.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
-import {
-  eigenaarTypeLabel,
-  formatDate,
-  formatEuro,
-  maatregelTypeLabel,
-  pandTypeLabel,
-} from "../../lib/formatters.js";
+import { getCurrentUser } from "../../lib/auth.js";
+import { formatEuro } from "../../lib/formatters.js";
 import {
   deletePand,
+  eigenaarTypeLabel,
   getPand,
-} from "../../lib/pandenApi.js";
+  maatregelLabel,
+  maatregelStatusLabel,
+  pandTypeLabel,
+} from "../../lib/panden.js";
+import NieuweMaatregelModal from "./NieuweMaatregelModal.jsx";
 
 export default function PandDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [pand, setPand] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("maatregelen");
-  const [showModal, setShowModal] = useState(false);
+  const [newModal, setNewModal] = useState(false);
 
-  async function load() {
+  const user = getCurrentUser();
+  const isAdmin = user?.role === "admin";
+
+  async function reload() {
     setLoading(true);
     try {
       const data = await getPand(id);
       setPand(data);
       setError(null);
-    } catch (err) {
-      setError(apiErrorMessage(err));
+    } catch (e) {
+      setError(apiErrorMessage(e));
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  async function handleDelete() {
-    if (
-      !window.confirm(
-        "Weet u zeker dat u dit pand wilt verwijderen? Dit maakt het dossier ontoegankelijk.",
-      )
-    )
-      return;
-    try {
-      await deletePand(id);
-      navigate("/panden", { replace: true });
-    } catch (err) {
-      alert(apiErrorMessage(err));
-    }
-  }
+    reload();
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
-      <div className="container-app flex min-h-[50vh] items-center justify-center py-14">
+      <div className="container-app flex min-h-[40vh] items-center justify-center py-10">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-greenLight border-t-brand-green" />
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="container-app py-10">
         <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {error}
         </div>
-        <Link to="/panden" className="mt-4 inline-block text-sm text-brand-green">
-          ← Terug naar mijn panden
-        </Link>
       </div>
     );
   }
-
   if (!pand) return null;
 
-  const maatregelen = pand.maatregelen ?? [];
+  async function handleDelete() {
+    if (
+      !confirm(
+        "Weet u zeker dat u dit pand wilt verwijderen? Alle bijbehorende maatregelen en dossiers worden ook verwijderd.",
+      )
+    )
+      return;
+    try {
+      await deletePand(pand.id);
+      window.location.assign("/panden");
+    } catch (e) {
+      alert(apiErrorMessage(e, "Verwijderen mislukt"));
+    }
+  }
 
   return (
     <div className="container-app py-8 sm:py-10">
@@ -94,9 +85,10 @@ export default function PandDetail() {
         to="/panden"
         className="text-sm font-semibold text-brand-green hover:underline"
       >
-        ← Alle panden
+        ← Terug naar panden
       </Link>
-      <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+
+      <header className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
             {pand.straat} {pand.huisnummer}
@@ -104,124 +96,81 @@ export default function PandDetail() {
           <p className="mt-1 text-sm text-gray-600">
             {pand.postcode} {pand.plaats}
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <EnergielabelBadge label={pand.energielabel_huidig} size="lg" />
-            <span className="text-sm text-gray-500">
-              {pandTypeLabel(pand.pand_type)} · Bouwjaar {pand.bouwjaar} ·{" "}
-              {eigenaarTypeLabel(pand.eigenaar_type)}
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+            <EnergielabelBadge label={pand.energielabel_huidig} />
+            <span>
+              <span className="text-gray-400">Bouwjaar:</span>{" "}
+              <span className="font-semibold text-gray-800">
+                {pand.bouwjaar}
+              </span>
+            </span>
+            <span>
+              <span className="text-gray-400">Type:</span>{" "}
+              <span className="font-semibold text-gray-800">
+                {pandTypeLabel(pand.pand_type)}
+              </span>
+            </span>
+            <span>
+              <span className="text-gray-400">Eigenaar:</span>{" "}
+              <span className="font-semibold text-gray-800">
+                {eigenaarTypeLabel(pand.eigenaar_type)}
+              </span>
             </span>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={handleDelete}
-            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-red-700 hover:border-red-200 hover:bg-red-50"
-          >
-            Verwijder pand
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowModal(true)}
-            className="btn-primary !py-2 !px-4 text-sm"
+            onClick={() => setNewModal(true)}
+            className="btn-primary"
           >
             + Maatregel toevoegen
           </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="text-sm font-semibold text-red-700 hover:underline"
+          >
+            Verwijder pand
+          </button>
         </div>
+      </header>
+
+      <div className="mt-6 border-b border-gray-200">
+        <nav className="-mb-px flex gap-6 text-sm font-semibold">
+          {[
+            ["maatregelen", "Maatregelen"],
+            ["aaa-lex", "AAA-Lex informatie"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTab(value)}
+              className={`border-b-2 pb-3 ${
+                tab === value
+                  ? "border-brand-green text-brand-green"
+                  : "border-transparent text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
       </div>
 
-      <div className="mt-6 flex gap-2 border-b border-gray-200">
-        <TabButton active={tab === "maatregelen"} onClick={() => setTab("maatregelen")}>
-          Maatregelen ({maatregelen.length})
-        </TabButton>
-        <TabButton active={tab === "aaa-lex"} onClick={() => setTab("aaa-lex")}>
-          AAA-Lex informatie
-        </TabButton>
-      </div>
-
-      {tab === "maatregelen" && (
-        <div className="mt-6">
-          {maatregelen.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
-              <div className="text-4xl" aria-hidden>
-                🧰
-              </div>
-              <h3 className="mt-3 text-lg font-bold text-gray-900">
-                Nog geen maatregelen
-              </h3>
-              <p className="mx-auto mt-1 max-w-md text-sm text-gray-600">
-                Voeg een maatregel toe om uw subsidiekansen te berekenen.
-                Elke maatregel koppelt aan een regeling (ISDE, EIA, MIA of
-                DUMAVA) met bijbehorende deadlines.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowModal(true)}
-                className="btn-primary mt-4"
-              >
-                + Eerste maatregel toevoegen
-              </button>
-            </div>
-          ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {maatregelen.map((m) => (
-                <MaatregelCard key={m.id} pand={pand} m={m} />
-              ))}
-            </div>
-          )}
-        </div>
+      {tab === "maatregelen" ? (
+        <MaatregelList pand={pand} onAdd={() => setNewModal(true)} />
+      ) : (
+        <AaaLexInfo pand={pand} isAdmin={isAdmin} />
       )}
 
-      {tab === "aaa-lex" && (
-        <div className="mt-6 space-y-4 rounded-2xl border border-gray-100 bg-white p-6">
-          <h3 className="text-base font-bold text-gray-900">AAA-Lex opname</h3>
-          <p className="text-sm text-gray-600">
-            Onderstaande gegevens worden door AAA-Lex ingevuld na een opname.
-            Zie dit als de 'fiche' van uw pand die wij gebruiken bij
-            subsidieaanvragen.
-          </p>
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <InfoRow
-              label="Huidig energielabel"
-              value={
-                pand.energielabel_huidig ? (
-                  <EnergielabelBadge label={pand.energielabel_huidig} />
-                ) : null
-              }
-              placeholder="AAA-Lex vult dit in na de opname"
-            />
-            <InfoRow
-              label="Label na maatregelen"
-              value={
-                pand.energielabel_na_maatregelen ? (
-                  <EnergielabelBadge
-                    label={pand.energielabel_na_maatregelen}
-                  />
-                ) : null
-              }
-              placeholder="Wordt ingevuld bij opname"
-            />
-            <InfoRow
-              label="Oppervlakte"
-              value={pand.oppervlakte_m2 ? `${pand.oppervlakte_m2} m²` : null}
-              placeholder="AAA-Lex meet dit bij de opname"
-            />
-            <InfoRow
-              label="Notities"
-              value={pand.notities}
-              placeholder="Nog geen notities."
-            />
-          </dl>
-        </div>
-      )}
-
-      {showModal && (
+      {newModal && (
         <NieuweMaatregelModal
           pand={pand}
-          onClose={() => setShowModal(false)}
+          onClose={() => setNewModal(false)}
           onCreated={() => {
-            setShowModal(false);
-            load();
+            setNewModal(false);
+            reload();
           }}
         />
       )}
@@ -229,99 +178,118 @@ export default function PandDetail() {
   );
 }
 
-function TabButton({ active, onClick, children }) {
+function MaatregelList({ pand, onAdd }) {
+  if (!pand.maatregelen || pand.maatregelen.length === 0) {
+    return (
+      <div className="mt-6 flex flex-col items-center rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
+        <div className="text-4xl">🛠️</div>
+        <h3 className="mt-3 text-lg font-semibold text-gray-900">
+          Nog geen maatregelen
+        </h3>
+        <p className="mt-1 max-w-sm text-sm text-gray-600">
+          Voeg een maatregel toe om uw subsidiekansen en deadlines te
+          berekenen.
+        </p>
+        <button type="button" onClick={onAdd} className="btn-primary mt-5">
+          + Eerste maatregel toevoegen
+        </button>
+      </div>
+    );
+  }
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold transition ${
-        active
-          ? "border-brand-green text-brand-green"
-          : "border-transparent text-gray-500 hover:text-gray-800"
-      }`}
-    >
-      {children}
-    </button>
+    <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+      {pand.maatregelen.map((m) => (
+        <li
+          key={m.id}
+          className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-base font-bold text-gray-900">
+                {maatregelLabel(m.maatregel_type)}
+              </h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">
+                  {maatregelStatusLabel(m.status)}
+                </span>
+                {m.regeling_code && <RegelingBadge code={m.regeling_code} />}
+              </div>
+            </div>
+            <DeadlineBadge status={m.deadline_status} datum={m.deadline_indienen} />
+          </div>
+
+          <dl className="mt-4 grid grid-cols-2 gap-y-1 text-xs text-gray-600">
+            <dt className="text-gray-400">Geschatte subsidie</dt>
+            <dd className="font-semibold text-gray-800">
+              {formatEuro(m.geschatte_subsidie)}
+            </dd>
+          </dl>
+
+          <div className="mt-4 flex items-center justify-end">
+            <Link
+              to={`/panden/${pand.id}/maatregelen/${m.id}`}
+              className="text-sm font-semibold text-brand-green hover:underline"
+            >
+              Bekijk dossier →
+            </Link>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 }
 
-function InfoRow({ label, value, placeholder }) {
+function AaaLexInfo({ pand, isAdmin }) {
   return (
-    <div>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm text-gray-800">
-        {value ?? (
-          <span className="italic text-gray-400">{placeholder}</span>
+    <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      <InfoCard title="Energie">
+        <Row label="Huidig label">
+          <EnergielabelBadge label={pand.energielabel_huidig} />
+        </Row>
+        <Row label="Label na maatregelen">
+          <EnergielabelBadge label={pand.energielabel_na_maatregelen} />
+        </Row>
+        <Row label="Oppervlakte">
+          <span className="font-semibold text-gray-800">
+            {pand.oppervlakte_m2 ? `${pand.oppervlakte_m2} m²` : "—"}
+          </span>
+        </Row>
+      </InfoCard>
+      <InfoCard title="Notities van AAA-Lex">
+        {pand.notities ? (
+          <p className="whitespace-pre-line text-sm text-gray-700">
+            {pand.notities}
+          </p>
+        ) : (
+          <p className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-3 text-sm italic text-gray-500">
+            AAA-Lex vult dit in na de opname.
+          </p>
         )}
-      </dd>
+        {isAdmin && (
+          <p className="mt-3 text-xs text-gray-400">
+            Admin-bewerking van deze velden komt in een volgende iteratie.
+          </p>
+        )}
+      </InfoCard>
     </div>
   );
 }
 
-function MaatregelCard({ pand, m }) {
-  const docsTotal = m.documents_required || 0;
-  const docsUploaded = m.documents_uploaded || 0;
-  const progressPct =
-    docsTotal > 0 ? Math.min(100, Math.round((docsUploaded / docsTotal) * 100)) : 0;
+function InfoCard({ title, children }) {
   return (
-    <article className="flex flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-base font-bold text-gray-900">
-            {maatregelTypeLabel(m.maatregel_type)}
-          </h3>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <MaatregelStatusBadge status={m.status} />
-            <RegelingPandBadge code={m.regeling_code} />
-          </div>
-        </div>
-        <DeadlineBadge status={m.deadline_status} datum={m.deadline_indienen} />
-      </div>
-
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-xs text-gray-600">
-        <div>
-          <dt className="font-semibold uppercase tracking-wide text-gray-400">
-            Geschat
-          </dt>
-          <dd className="text-sm font-semibold text-gray-900">
-            {formatEuro(m.geschatte_subsidie)}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-semibold uppercase tracking-wide text-gray-400">
-            Deadline
-          </dt>
-          <dd className="text-sm text-gray-800">
-            {m.deadline_indienen ? formatDate(m.deadline_indienen) : "—"}
-          </dd>
-        </div>
-      </dl>
-
-      <div className="mt-4">
-        <div className="flex items-center justify-between text-xs text-gray-600">
-          <span>Documenten</span>
-          <span>
-            {docsUploaded}/{docsTotal} geüpload
-          </span>
-        </div>
-        <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-100">
-          <div
-            className="h-full bg-brand-green transition-all"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="mt-4 flex items-center justify-end">
-        <Link
-          to={`/panden/${pand.id}/maatregelen/${m.id}`}
-          className="text-sm font-semibold text-brand-green hover:underline"
-        >
-          Bekijk dossier →
-        </Link>
-      </div>
-    </article>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h3 className="text-sm font-extrabold uppercase tracking-wide text-gray-500">
+        {title}
+      </h3>
+      <div className="mt-3 space-y-2">{children}</div>
+    </div>
+  );
+}
+function Row({ label, children }) {
+  return (
+    <div className="flex items-center justify-between gap-4 text-sm">
+      <span className="text-gray-500">{label}</span>
+      <span>{children}</span>
+    </div>
   );
 }

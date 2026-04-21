@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import StatusBadge, { RegelingBadge } from "../../components/StatusBadge.jsx";
+import KritiekeDeadlinesWidget from "../../components/panden/KritiekeDeadlinesWidget.jsx";
 import api, { apiErrorMessage } from "../../lib/api.js";
 import {
   daysUntil,
@@ -92,6 +93,9 @@ export default function AdminDashboard() {
         <div className="flex gap-2">
           <Link to="/admin/aanvragen" className="btn-secondary !py-2 !px-4 text-sm">
             Alle aanvragen
+          </Link>
+          <Link to="/admin/panden" className="btn-secondary !py-2 !px-4 text-sm">
+            Panden
           </Link>
           <Link to="/admin/klanten" className="btn-primary !py-2 !px-4 text-sm">
             Klanten
@@ -191,6 +195,10 @@ export default function AdminDashboard() {
                 })}
               </div>
             </div>
+          </div>
+
+          <div className="mt-8">
+            <KritiekeDeadlinesWidget maxDagen={30} limit={8} />
           </div>
 
           <div className="mt-8 overflow-hidden rounded-xl border border-gray-200 bg-white">

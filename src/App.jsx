@@ -15,17 +15,17 @@ import AdminAanvraagBeheer from "./pages/admin/AanvraagBeheer.jsx";
 import AdminAanvraagDetail from "./pages/admin/AanvraagDetail.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminKlantenBeheer from "./pages/admin/KlantenBeheer.jsx";
-import AdminPanden from "./pages/admin/AdminPanden.jsx";
 import AdminRegelingenBeheer from "./pages/admin/RegelingenBeheer.jsx";
-import DossierPandenDetail from "./pages/panden/DossierDetail.jsx";
-import NieuwPand from "./pages/panden/NieuwPand.jsx";
-import PandDetail from "./pages/panden/PandDetail.jsx";
-import PandenLijst from "./pages/panden/PandenLijst.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
 import OnboardingPlan from "./pages/onboarding/OnboardingPlan.jsx";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess.jsx";
+import MaatregelDossier from "./pages/panden/MaatregelDossier.jsx";
+import NieuwPand from "./pages/panden/NieuwPand.jsx";
+import PandDetail from "./pages/panden/PandDetail.jsx";
+import PandenOverzicht from "./pages/panden/PandenOverzicht.jsx";
+import AdminPandenBeheer from "./pages/admin/PandenBeheer.jsx";
 import Abonnement from "./pages/installateur/Abonnement.jsx";
 import DossierDetail from "./pages/installateur/DossierDetail.jsx";
 import DossiersOverzicht from "./pages/installateur/DossiersOverzicht.jsx";
@@ -47,12 +47,12 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/aanvraag/nieuw" element={<NieuweAanvraag />} />
           <Route path="/aanvraag/:id" element={<AanvraagDetail />} />
-          <Route path="/panden" element={<PandenLijst />} />
+          <Route path="/panden" element={<PandenOverzicht />} />
           <Route path="/panden/nieuw" element={<NieuwPand />} />
-          <Route path="/panden/:pandId" element={<PandDetail />} />
+          <Route path="/panden/:id" element={<PandDetail />} />
           <Route
             path="/panden/:pandId/maatregelen/:maatregelId"
-            element={<DossierPandenDetail />}
+            element={<MaatregelDossier />}
           />
           <Route path="/onboarding/plan" element={<OnboardingPlan />} />
           <Route path="/onboarding/success" element={<OnboardingSuccess />} />
@@ -66,7 +66,7 @@ export default function App() {
             element={<AdminAanvraagDetail />}
           />
           <Route path="/admin/klanten" element={<AdminKlantenBeheer />} />
-          <Route path="/admin/panden" element={<AdminPanden />} />
+          <Route path="/admin/panden" element={<AdminPandenBeheer />} />
           <Route
             path="/admin/regelingen"
             element={<AdminRegelingenBeheer />}

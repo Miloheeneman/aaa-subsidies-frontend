@@ -1,64 +1,44 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const PLAN_LABELS = {
-  gratis: "Gratis",
-  starter: "Starter",
-  pro: "Pro",
-  enterprise: "Enterprise",
-};
-
-export default function UpgradeModal({ info, onClose }) {
-  if (!info) return null;
-  const planLabel = PLAN_LABELS[info.plan] ?? info.plan;
+/**
+ * Shown when the user tries to create a pand past their plan limit.
+ * Parent decides when to open/close via the ``open`` + ``onClose`` props.
+ */
+export default function UpgradeModal({ open, onClose, quota }) {
+  const navigate = useNavigate();
+  if (!open) return null;
+  const plan = quota?.plan || "gratis";
+  const limit = quota?.limit ?? null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="upgrade-title"
     >
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 id="upgrade-title" className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-extrabold text-gray-900">
           Pandlimiet bereikt
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-gray-700">
-          Uw huidige {planLabel}-plan staat <strong>{info.limit} panden</strong>{" "}
-          toe. U heeft er al <strong>{info.current}</strong> in beheer. Upgrade
-          voor meer panden en extra functies.
+        <p className="mt-2 text-sm text-gray-600">
+          Uw huidige <span className="font-semibold">{plan}</span>-plan staat{" "}
+          <span className="font-semibold">{limit ?? "onbeperkt"}</span> panden
+          toe. Upgrade voor meer panden en extra functies.
         </p>
-        <div className="mt-5 rounded-lg border border-brand-green/20 bg-brand-greenLight/60 p-4 text-sm text-gray-800">
-          <div className="text-xs font-semibold uppercase tracking-wide text-brand-green">
-            Meer panden nodig?
-          </div>
-          <ul className="mt-2 space-y-1.5">
-            <li>
-              <strong>Starter</strong> — tot 30 panden, ideaal voor kleine
-              verhuurders.
-            </li>
-            <li>
-              <strong>Pro</strong> — tot 100 panden, inclusief prioriteit-support.
-            </li>
-            <li>
-              <strong>Enterprise</strong> — onbeperkt, op maat voor VvE's en
-              beheerders.
-            </li>
-          </ul>
-        </div>
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             type="button"
-            className="btn-secondary !px-5 !py-2.5 text-sm"
             onClick={onClose}
+            className="btn-secondary !py-2 !px-4 text-sm"
           >
             Later
           </button>
-          <Link
-            to="/onboarding/plan"
-            className="btn-primary !px-5 !py-2.5 text-sm"
-            onClick={onClose}
+          <button
+            type="button"
+            onClick={() => navigate("/onboarding/plan")}
+            className="btn-primary !py-2 !px-4 text-sm"
           >
             Bekijk plannen
-          </Link>
+          </button>
         </div>
       </div>
     </div>
