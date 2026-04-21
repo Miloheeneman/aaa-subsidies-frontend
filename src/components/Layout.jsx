@@ -148,11 +148,12 @@ export default function Layout() {
       <footer className="border-t border-gray-200 bg-brand-greenLight">
         <div className="container-app flex flex-col items-start justify-between gap-4 py-8 text-sm text-gray-700 md:flex-row md:items-center">
           <div>
-            <div className="font-bold text-brand-green">AAA-Lex Offices</div>
-            <div>Subsidieaanvragen voor duurzame energie-investeringen.</div>
+            <div className="font-bold text-brand-green">AAA-Subsidies</div>
+            <div>Een initiatief van AAA-Lex Offices.</div>
           </div>
           <div className="text-gray-500">
-            © {new Date().getFullYear()} AAA-Lex Offices — app.aaa-lexoffices.nl
+            © {new Date().getFullYear()} AAA-Subsidies | Onderdeel van
+            AAA-Lex Offices B.V.
           </div>
         </div>
       </footer>

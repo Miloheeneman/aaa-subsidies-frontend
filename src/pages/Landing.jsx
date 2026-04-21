@@ -164,10 +164,6 @@ const faqItems = [
     q: "Wat als mijn aanvraag wordt afgewezen?",
     a: "Bij afwijzing betaalt u geen succesfee. Wij analyseren de motivatie, en bekijken of een hernieuwd of aanvullend dossier alsnog kans van slagen heeft (bijvoorbeeld via een andere regeling).",
   },
-  {
-    q: "Hoe werkt de AAA-Lex meting?",
-    a: "Onze adviseur komt langs voor een opname van uw pand of installatie. Wij meten oppervlaktes, beoordelen het huidige energielabel en bepalen welke subsidiabele maatregelen het meeste opleveren. Het rapport koppelen wij direct aan uw account zodat de subsidiecheck automatisch is ingevuld.",
-  },
 ];
 
 function FaqItem({ item, open, onToggle }) {
@@ -539,7 +535,7 @@ export default function Landing() {
             Veelgestelde vragen
           </h2>
           <p className="mt-3 text-gray-600">
-            Geen passend antwoord? Neem direct contact op met AAA-Lex.
+            Geen passend antwoord? Neem dan contact met ons op.
           </p>
         </Reveal>
         <div className="grid gap-3">
