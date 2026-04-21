@@ -15,7 +15,12 @@ import AdminAanvraagBeheer from "./pages/admin/AanvraagBeheer.jsx";
 import AdminAanvraagDetail from "./pages/admin/AanvraagDetail.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminKlantenBeheer from "./pages/admin/KlantenBeheer.jsx";
+import AdminPanden from "./pages/admin/AdminPanden.jsx";
 import AdminRegelingenBeheer from "./pages/admin/RegelingenBeheer.jsx";
+import DossierPandenDetail from "./pages/panden/DossierDetail.jsx";
+import NieuwPand from "./pages/panden/NieuwPand.jsx";
+import PandDetail from "./pages/panden/PandDetail.jsx";
+import PandenLijst from "./pages/panden/PandenLijst.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
@@ -42,6 +47,13 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/aanvraag/nieuw" element={<NieuweAanvraag />} />
           <Route path="/aanvraag/:id" element={<AanvraagDetail />} />
+          <Route path="/panden" element={<PandenLijst />} />
+          <Route path="/panden/nieuw" element={<NieuwPand />} />
+          <Route path="/panden/:pandId" element={<PandDetail />} />
+          <Route
+            path="/panden/:pandId/maatregelen/:maatregelId"
+            element={<DossierPandenDetail />}
+          />
           <Route path="/onboarding/plan" element={<OnboardingPlan />} />
           <Route path="/onboarding/success" element={<OnboardingSuccess />} />
         </Route>
@@ -54,6 +66,7 @@ export default function App() {
             element={<AdminAanvraagDetail />}
           />
           <Route path="/admin/klanten" element={<AdminKlantenBeheer />} />
+          <Route path="/admin/panden" element={<AdminPanden />} />
           <Route
             path="/admin/regelingen"
             element={<AdminRegelingenBeheer />}

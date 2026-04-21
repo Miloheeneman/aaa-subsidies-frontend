@@ -2,14 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import StatusBadge, { RegelingBadge } from "../components/StatusBadge.jsx";
+import {
+  DeadlineBadge,
+  EnergielabelBadge,
+} from "../components/panden/PandBadges.jsx";
 import { api, apiErrorMessage } from "../lib/api.js";
 import { setCachedMe } from "../lib/auth.js";
 import {
+  daysUntil,
   formatDate,
   formatEuro,
-  daysUntil,
   maatregelLabel,
+  pandTypeLabel,
 } from "../lib/formatters.js";
+import { listPanden } from "../lib/pandenApi.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -88,17 +94,23 @@ function DeadlineCell({ datum }) {
 export default function Dashboard() {
   const [me, setMe] = useState(null);
   const [aanvragen, setAanvragen] = useState([]);
+  const [panden, setPanden] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.get("/auth/me"), api.get("/aanvragen")])
-      .then(([meRes, aanRes]) => {
+    Promise.all([
+      api.get("/auth/me"),
+      api.get("/aanvragen"),
+      listPanden().catch(() => []),
+    ])
+      .then(([meRes, aanRes, pandenData]) => {
         if (cancelled) return;
         setMe(meRes.data);
         setCachedMe(meRes.data);
         setAanvragen(aanRes.data ?? []);
+        setPanden(pandenData ?? []);
         setLoading(false);
       })
       .catch((err) => {
@@ -210,6 +222,73 @@ export default function Dashboard() {
           }
         />
         <Kpi label="Toegekende subsidie" value={formatEuro(kpis.toegekend)} />
+      </div>
+
+      <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 p-5">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Mijn Panden</h2>
+            <p className="text-xs text-gray-500">
+              Beheer uw vastgoed en voeg maatregelen toe per pand.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/panden"
+              className="text-sm font-semibold text-brand-green hover:underline"
+            >
+              Alle panden →
+            </Link>
+            <Link
+              to="/panden/nieuw"
+              className="btn-primary !py-2 !px-4 text-sm"
+            >
+              + Nieuw pand
+            </Link>
+          </div>
+        </div>
+        {panden.length === 0 ? (
+          <div className="grid place-items-center gap-3 px-5 py-10 text-center">
+            <div className="text-4xl" aria-hidden>
+              🏠
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-900">
+                U heeft nog geen panden
+              </h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Voeg uw eerste pand toe om subsidiekansen te ontdekken.
+              </p>
+            </div>
+            <Link to="/panden/nieuw" className="btn-primary">
+              Voeg eerste pand toe
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
+            {panden.slice(0, 6).map((p) => (
+              <Link
+                key={p.id}
+                to={`/panden/${p.id}`}
+                className="flex items-start justify-between gap-3 rounded-lg border border-gray-100 p-3 transition hover:border-brand-green/40"
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold text-gray-900">
+                    {p.straat} {p.huisnummer}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {pandTypeLabel(p.pand_type)} · {p.maatregelen_count}{" "}
+                    {p.maatregelen_count === 1 ? "maatregel" : "maatregelen"}
+                  </div>
+                  <div className="mt-2">
+                    <DeadlineBadge status={p.deadline_status} compact />
+                  </div>
+                </div>
+                <EnergielabelBadge label={p.energielabel_huidig} size="sm" />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">

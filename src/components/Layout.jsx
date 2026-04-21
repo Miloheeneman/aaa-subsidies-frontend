@@ -16,12 +16,14 @@ const publicLinks = [
 
 const klantLinks = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/panden", label: "Mijn panden" },
   { to: "/aanvraag/nieuw", label: "Nieuwe aanvraag" },
 ];
 
 const adminLinks = [
   { to: "/admin/dashboard", label: "Dashboard" },
   { to: "/admin/aanvragen", label: "Aanvragen" },
+  { to: "/admin/panden", label: "Panden" },
   { to: "/admin/klanten", label: "Klanten" },
   { to: "/admin/regelingen", label: "Regelingen" },
 ];
