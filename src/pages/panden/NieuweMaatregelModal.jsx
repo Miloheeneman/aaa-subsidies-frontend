@@ -302,7 +302,10 @@ function Step2({ form, set, isISDE, isEIAMIA }) {
         </div>
       )}
 
-      <Field label="Geschatte subsidie (€)">
+      <Field
+        label="Geschatte subsidie (€) — optioneel"
+        helper="Leeg laten = automatisch berekend op basis van maatregeltype en investering."
+      >
         <input
           type="number"
           min={0}
@@ -310,9 +313,44 @@ function Step2({ form, set, isISDE, isEIAMIA }) {
           className="input"
           value={form.geschatte_subsidie}
           onChange={(e) => set("geschatte_subsidie", e.target.value)}
-          placeholder="Bijv. 3500"
+          placeholder="Leeg = AAA-Lex schat automatisch"
         />
       </Field>
+
+      <LivePreview form={form} isISDE={isISDE} isEIAMIA={isEIAMIA} />
+    </div>
+  );
+}
+
+function LivePreview({ form, isISDE, isEIAMIA }) {
+  const regeling = isISDE ? "ISDE" : isEIAMIA ? "EIA" : null;
+  const deadline = computeFrontendDeadline(form, regeling);
+  const estimate =
+    form.geschatte_subsidie
+      ? Number(form.geschatte_subsidie)
+      : estimateSubsidieClient(
+          form.maatregel_type,
+          form.investering_bedrag ? Number(form.investering_bedrag) : null
+        );
+
+  if (!estimate && !deadline) return null;
+
+  return (
+    <div className="rounded-xl border border-brand-green/20 bg-brand-greenLight/50 p-4 text-sm">
+      <div className="text-xs font-extrabold uppercase tracking-wide text-brand-greenDark">
+        Live schatting
+      </div>
+      <dl className="mt-2 grid grid-cols-2 gap-y-1">
+        <dt className="text-gray-600">Geschatte subsidie</dt>
+        <dd className="font-semibold text-gray-900">
+          {estimate ? `± ${formatEuro(estimate)}` : "—"}
+        </dd>
+        <dt className="text-gray-600">Indienen voor</dt>
+        <dd className="font-semibold text-gray-900">{deadline || "—"}</dd>
+      </dl>
+      <p className="mt-2 text-xs text-gray-500">
+        Definitieve bedragen en datums worden door AAA-Lex bevestigd.
+      </p>
     </div>
   );
 }
@@ -388,6 +426,32 @@ function Field({ label, helper, children }) {
       {helper && <span className="mt-1 block text-xs text-gray-500">{helper}</span>}
     </label>
   );
+}
+
+const _FLAT = {
+  warmtepomp_lucht_water: 2500,
+  warmtepomp_water_water: 3500,
+  warmtepomp_hybride: 1500,
+};
+const _PCT = {
+  dakisolatie: [0.2, 3000],
+  gevelisolatie: [0.2, 2500],
+  vloerisolatie: [0.2, 1500],
+  hr_glas: [0.2, 2000],
+  zonneboiler: [0.2, 2000],
+  eia_investering: [0.455, null],
+  mia_vamil_investering: [0.36, null],
+  dumava_maatregel: [0.3, null],
+};
+
+function estimateSubsidieClient(maatregelType, investering) {
+  if (!maatregelType) return null;
+  if (_FLAT[maatregelType] != null) return _FLAT[maatregelType];
+  const pct = _PCT[maatregelType];
+  if (!pct || !investering || investering <= 0) return null;
+  const [rate, cap] = pct;
+  const raw = Math.round(investering * rate * 100) / 100;
+  return cap != null && raw > cap ? cap : raw;
 }
 
 function computeFrontendDeadline(form, regeling) {

@@ -9,12 +9,14 @@ import { apiErrorMessage } from "../../lib/api.js";
 import { getCurrentUser } from "../../lib/auth.js";
 import { formatEuro } from "../../lib/formatters.js";
 import {
+  ENERGIELABELS,
   deletePand,
   eigenaarTypeLabel,
   getPand,
   maatregelLabel,
   maatregelStatusLabel,
   pandTypeLabel,
+  updatePand,
 } from "../../lib/panden.js";
 import NieuweMaatregelModal from "./NieuweMaatregelModal.jsx";
 
@@ -161,7 +163,7 @@ export default function PandDetail() {
       {tab === "maatregelen" ? (
         <MaatregelList pand={pand} onAdd={() => setNewModal(true)} />
       ) : (
-        <AaaLexInfo pand={pand} isAdmin={isAdmin} />
+        <AaaLexInfo pand={pand} isAdmin={isAdmin} onSaved={reload} />
       )}
 
       {newModal && (
@@ -239,7 +241,10 @@ function MaatregelList({ pand, onAdd }) {
   );
 }
 
-function AaaLexInfo({ pand, isAdmin }) {
+function AaaLexInfo({ pand, isAdmin, onSaved }) {
+  if (isAdmin) {
+    return <AaaLexAdminEditor pand={pand} onSaved={onSaved} />;
+  }
   return (
     <div className="mt-6 grid gap-4 lg:grid-cols-2">
       <InfoCard title="Energie">
@@ -265,12 +270,144 @@ function AaaLexInfo({ pand, isAdmin }) {
             AAA-Lex vult dit in na de opname.
           </p>
         )}
-        {isAdmin && (
-          <p className="mt-3 text-xs text-gray-400">
-            Admin-bewerking van deze velden komt in een volgende iteratie.
-          </p>
-        )}
       </InfoCard>
+    </div>
+  );
+}
+
+function AaaLexAdminEditor({ pand, onSaved }) {
+  const [form, setForm] = useState({
+    energielabel_huidig: pand.energielabel_huidig || "",
+    energielabel_na_maatregelen: pand.energielabel_na_maatregelen || "",
+    oppervlakte_m2: pand.oppervlakte_m2 ?? "",
+    notities: pand.notities || "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [msg, setMsg] = useState(null);
+
+  function set(f, v) {
+    setForm((prev) => ({ ...prev, [f]: v }));
+  }
+
+  async function save() {
+    setSaving(true);
+    setError(null);
+    setMsg(null);
+    try {
+      await updatePand(pand.id, {
+        energielabel_huidig: form.energielabel_huidig || null,
+        energielabel_na_maatregelen: form.energielabel_na_maatregelen || null,
+        oppervlakte_m2:
+          form.oppervlakte_m2 === "" ? null : Number(form.oppervlakte_m2),
+        notities: form.notities || null,
+      });
+      setMsg("Opgeslagen");
+      onSaved?.();
+    } catch (e) {
+      setError(apiErrorMessage(e, "Opslaan mislukt"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2">
+        <span className="rounded-full bg-brand-greenLight px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-brand-green">
+          Admin
+        </span>
+        <h3 className="text-sm font-extrabold uppercase tracking-wide text-gray-500">
+          AAA-Lex gegevens bewerken
+        </h3>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm">
+          <span className="mb-1 inline-block font-semibold text-gray-800">
+            Energielabel huidig
+          </span>
+          <select
+            className="input"
+            value={form.energielabel_huidig}
+            onChange={(e) => set("energielabel_huidig", e.target.value)}
+          >
+            <option value="">— Onbekend —</option>
+            {ENERGIELABELS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 inline-block font-semibold text-gray-800">
+            Energielabel na maatregelen
+          </span>
+          <select
+            className="input"
+            value={form.energielabel_na_maatregelen}
+            onChange={(e) =>
+              set("energielabel_na_maatregelen", e.target.value)
+            }
+          >
+            <option value="">— Onbekend —</option>
+            {ENERGIELABELS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 inline-block font-semibold text-gray-800">
+            Oppervlakte (m²)
+          </span>
+          <input
+            type="number"
+            step="0.1"
+            min="0"
+            className="input"
+            value={form.oppervlakte_m2}
+            onChange={(e) => set("oppervlakte_m2", e.target.value)}
+          />
+        </label>
+      </div>
+
+      <label className="mt-4 block text-sm">
+        <span className="mb-1 inline-block font-semibold text-gray-800">
+          Notities
+        </span>
+        <textarea
+          rows={4}
+          className="input"
+          value={form.notities}
+          onChange={(e) => set("notities", e.target.value)}
+          placeholder="Opname-notities, bijzonderheden, afspraken…"
+        />
+      </label>
+
+      {error && (
+        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
+      {msg && (
+        <div className="mt-3 rounded-md border border-brand-green/30 bg-brand-greenLight p-3 text-sm text-brand-greenDark">
+          {msg}
+        </div>
+      )}
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={save}
+          className="btn-primary"
+          disabled={saving}
+        >
+          {saving ? "Opslaan…" : "Opslaan"}
+        </button>
+      </div>
     </div>
   );
 }

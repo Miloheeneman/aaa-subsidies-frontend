@@ -235,6 +235,12 @@ export default function Dashboard() {
               </span>
             )}
             <Link
+              to="/panden/nieuw"
+              className="font-semibold text-brand-green hover:underline"
+            >
+              + Pand toevoegen
+            </Link>
+            <Link
               to="/panden"
               className="font-semibold text-brand-green hover:underline"
             >
@@ -242,6 +248,27 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+
+        {pandenQuota &&
+          pandenQuota.limit !== null &&
+          pandenQuota.remaining !== null &&
+          pandenQuota.remaining <= 1 &&
+          !pandenQuota.exceeded && (
+            <div className="border-b border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-900">
+              U heeft nog{" "}
+              <strong>
+                {pandenQuota.remaining} pand
+                {pandenQuota.remaining === 1 ? "" : "en"}
+              </strong>{" "}
+              over in uw huidige plan.{" "}
+              <Link
+                to="/onboarding/plan"
+                className="font-semibold underline hover:text-amber-950"
+              >
+                Upgrade voor meer panden →
+              </Link>
+            </div>
+          )}
         {panden.length === 0 ? (
           <div className="grid place-items-center gap-4 px-5 py-10 text-center">
             <div className="text-5xl" aria-hidden>

@@ -52,7 +52,8 @@ export default function PandenBeheer() {
       return (
         p.straat.toLowerCase().includes(q) ||
         p.plaats.toLowerCase().includes(q) ||
-        p.postcode.toLowerCase().includes(q)
+        p.postcode.toLowerCase().includes(q) ||
+        (p.organisation_name || "").toLowerCase().includes(q)
       );
     });
   }, [state.data, search, statusFilter]);
@@ -80,7 +81,7 @@ export default function PandenBeheer() {
       <div className="mt-6 flex flex-wrap gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
         <input
           className="input sm:max-w-sm"
-          placeholder="Zoek op adres of plaats"
+          placeholder="Zoek op klant, adres of plaats"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -108,6 +109,7 @@ export default function PandenBeheer() {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
               <tr>
+                <th className="px-4 py-2">Klant</th>
                 <th className="px-4 py-2">Adres</th>
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2">Eigenaar</th>
@@ -121,19 +123,24 @@ export default function PandenBeheer() {
             <tbody className="divide-y divide-gray-100">
               {state.loading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-500">
+                  <td colSpan={9} className="px-4 py-10 text-center text-gray-500">
                     Laden…
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-500">
+                  <td colSpan={9} className="px-4 py-10 text-center text-gray-500">
                     Geen panden gevonden voor deze filters.
                   </td>
                 </tr>
               ) : (
                 filtered.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-gray-900">
+                        {p.organisation_name || "—"}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-gray-900">
                         {p.straat} {p.huisnummer}

@@ -98,8 +98,15 @@ export default function MaatregelDossier() {
 
   const verplichtTotaal = checklist.verplicht_totaal;
   const verplichtGeupload = checklist.verplicht_geupload;
+  const verplichtGeverifieerd = checklist.verplicht_geverifieerd ?? 0;
   const compleet = verplichtTotaal > 0 && verplichtGeupload >= verplichtTotaal;
+  const allVerified =
+    compleet && verplichtGeverifieerd >= verplichtTotaal;
   const missing = Math.max(0, verplichtTotaal - verplichtGeupload);
+  const progressPct =
+    verplichtTotaal > 0
+      ? Math.round((verplichtGeupload / verplichtTotaal) * 100)
+      : 0;
 
   return (
     <div className="container-app py-8 sm:py-10">
@@ -150,31 +157,29 @@ export default function MaatregelDossier() {
         </div>
       </header>
 
-      <div
-        className={`mt-6 rounded-xl border p-4 text-sm ${
-          compleet
-            ? "border-brand-green/30 bg-brand-greenLight text-brand-greenDark"
-            : "border-amber-200 bg-amber-50 text-amber-900"
-        }`}
-      >
-        {compleet ? (
-          <>
-            <strong>Dossier compleet.</strong> AAA-Lex kan uw aanvraag nu
-            indienen bij RVO.
-          </>
-        ) : (
-          <>
-            <strong>
-              Nog {missing} document{missing === 1 ? "" : "en"} nodig
-            </strong>{" "}
-            voordat wij uw aanvraag kunnen indienen.
-          </>
-        )}
-      </div>
+      <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-bold text-gray-900">Documenten</h2>
+          <span className="text-sm text-gray-600">
+            <strong className="text-gray-900">{verplichtGeupload}</strong> van{" "}
+            <strong className="text-gray-900">{verplichtTotaal}</strong>{" "}
+            verplichte documenten geüpload
+          </span>
+        </div>
+        <div
+          className="mt-3 h-2 overflow-hidden rounded-full bg-gray-100"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPct}
+        >
+          <div
+            className="h-full rounded-full bg-brand-green transition-all"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
 
-      <section className="mt-6">
-        <h2 className="text-lg font-bold text-gray-900">Documenten</h2>
-        <ul className="mt-3 space-y-3">
+        <ul className="mt-5 space-y-3">
           {checklist.items.map((item) => (
             <DocRow
               key={item.document_type}
@@ -204,20 +209,75 @@ export default function MaatregelDossier() {
             />
           ))}
         </ul>
+
+        <div
+          className={`mt-5 rounded-xl border p-4 text-sm ${
+            !compleet
+              ? "border-amber-200 bg-amber-50 text-amber-900"
+              : allVerified
+              ? "border-brand-green/30 bg-brand-greenLight text-brand-greenDark"
+              : "border-blue-200 bg-blue-50 text-blue-900"
+          }`}
+        >
+          {!compleet ? (
+            <>
+              <strong>
+                Nog {missing} document{missing === 1 ? "" : "en"} nodig
+              </strong>{" "}
+              voordat wij kunnen indienen.
+            </>
+          ) : allVerified ? (
+            <>
+              <strong>Dossier compleet ✓</strong> AAA-Lex kan uw aanvraag nu
+              indienen bij RVO.
+            </>
+          ) : (
+            <>
+              <strong>Dossier in review.</strong> AAA-Lex controleert uw
+              documenten.
+            </>
+          )}
+        </div>
       </section>
     </div>
   );
 }
 
+function StatusIcon({ item }) {
+  const base =
+    "flex h-7 w-7 flex-none items-center justify-center rounded-full border text-[13px] font-extrabold";
+  if (item.geverifieerd) {
+    return (
+      <span
+        aria-label="Geverifieerd"
+        className={`${base} border-brand-green bg-brand-green text-white`}
+      >
+        ✓
+      </span>
+    );
+  }
+  if (item.geupload) {
+    return (
+      <span
+        aria-label="Geüpload, wacht op verificatie"
+        className={`${base} border-brand-green bg-white text-brand-green`}
+      >
+        ◐
+      </span>
+    );
+  }
+  return (
+    <span
+      aria-label={item.verplicht ? "Ontbreekt" : "Optioneel"}
+      className={`${base} border-gray-200 bg-gray-50 text-gray-400`}
+    >
+      {item.verplicht ? "✗" : "–"}
+    </span>
+  );
+}
+
 function DocRow({ item, onUpload, onVerify, onDelete, uploading, isAdmin }) {
   const fileRef = useRef(null);
-  const statusIcon = item.geverifieerd
-    ? "✅"
-    : item.geupload
-    ? "⏳"
-    : item.verplicht
-    ? "❌"
-    : "–";
   const statusLabel = item.geverifieerd
     ? "Geverifieerd door AAA-Lex"
     : item.geupload
@@ -229,9 +289,7 @@ function DocRow({ item, onUpload, onVerify, onDelete, uploading, isAdmin }) {
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 text-xl" aria-hidden>
-          {statusIcon}
-        </div>
+        <StatusIcon item={item} />
         <div>
           <div className="font-semibold text-gray-900">
             {item.label}
