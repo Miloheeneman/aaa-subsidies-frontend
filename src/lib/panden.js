@@ -209,6 +209,34 @@ export async function kritiekeDeadlines(maxDagen = 30) {
   return data;
 }
 
+export async function getSubsidiesVoorPand(pandId) {
+  const { data } = await api.get(`/panden/${pandId}/subsidies`);
+  return data; // { pand_id, eligible: [...], niet_eligible: [...] }
+}
+
+// ---------------------------------------------------------------------------
+// Subsidie matching helpers (mirror van backend SubsidieMatch)
+// ---------------------------------------------------------------------------
+
+export const SUBSIDIE_REGELING_BADGE = {
+  ISDE_WARMTEPOMP: "ISDE",
+  ISDE_ISOLATIE: "ISDE",
+  EIA: "EIA",
+  MIA_VAMIL: "MIA",
+  DUMAVA: "DUMAVA",
+  SVVE: "SVVE",
+};
+
+export function deadlineUitleg(deadlineType, maanden) {
+  if (deadlineType === "voor_offerte") {
+    return `Aanvraag indienen vóór de offerte — uiterlijk ${maanden} maanden geldig`;
+  }
+  if (deadlineType === "na_installatie") {
+    return `Aanvragen binnen ${maanden} maanden na installatie`;
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Deadline helpers
 // ---------------------------------------------------------------------------

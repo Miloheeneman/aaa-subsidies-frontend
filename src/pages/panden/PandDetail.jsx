@@ -10,9 +10,12 @@ import { getCurrentUser } from "../../lib/auth.js";
 import { formatEuro } from "../../lib/formatters.js";
 import {
   ENERGIELABELS,
+  SUBSIDIE_REGELING_BADGE,
+  deadlineUitleg,
   deletePand,
   eigenaarTypeLabel,
   getPand,
+  getSubsidiesVoorPand,
   maatregelLabel,
   maatregelStatusLabel,
   pandTypeLabel,
@@ -27,20 +30,30 @@ export default function PandDetail() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("maatregelen");
   const [newModal, setNewModal] = useState(false);
+  const [subsidies, setSubsidies] = useState(null);
+  const [subsidiesLoading, setSubsidiesLoading] = useState(true);
 
   const user = getCurrentUser();
   const isAdmin = user?.role === "admin";
 
   async function reload() {
     setLoading(true);
+    setSubsidiesLoading(true);
     try {
-      const data = await getPand(id);
-      setPand(data);
+      // Pand en subsidies parallel ophalen — beide hebben hetzelfde
+      // 403/404-gedrag dus we tonen één foutmelding voor het pand.
+      const [pandData, subsidiesData] = await Promise.all([
+        getPand(id),
+        getSubsidiesVoorPand(id).catch(() => null),
+      ]);
+      setPand(pandData);
+      setSubsidies(subsidiesData);
       setError(null);
     } catch (e) {
       setError(apiErrorMessage(e));
     } finally {
       setLoading(false);
+      setSubsidiesLoading(false);
     }
   }
 
@@ -138,7 +151,13 @@ export default function PandDetail() {
         </div>
       </header>
 
-      <div className="mt-6 border-b border-gray-200">
+      <SubsidieKansen
+        pandId={pand.id}
+        data={subsidies}
+        loading={subsidiesLoading}
+      />
+
+      <div className="mt-8 border-b border-gray-200">
         <nav className="-mb-px flex gap-6 text-sm font-semibold">
           {[
             ["maatregelen", "Maatregelen"],
@@ -409,6 +428,173 @@ function AaaLexAdminEditor({ pand, onSaved }) {
         </button>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Subsidiekansen sectie
+// ---------------------------------------------------------------------------
+
+function SubsidieKansen({ pandId, data, loading }) {
+  const [showNiet, setShowNiet] = useState(false);
+
+  if (loading) {
+    return (
+      <section className="mt-8 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="h-5 w-64 animate-pulse rounded bg-gray-100" />
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="h-32 animate-pulse rounded-xl bg-gray-50" />
+          <div className="h-32 animate-pulse rounded-xl bg-gray-50" />
+        </div>
+      </section>
+    );
+  }
+
+  if (!data) return null;
+
+  const { eligible = [], niet_eligible: nietEligible = [] } = data;
+
+  if (eligible.length === 0 && nietEligible.length === 0) {
+    return (
+      <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <h2 className="text-lg font-extrabold text-amber-900">
+          Geen passende subsidies gevonden
+        </h2>
+        <p className="mt-2 text-sm text-amber-900/90">
+          Op basis van de pand gegevens hebben wij geen passende subsidies
+          gevonden. Neem contact op met AAA-Lex voor een persoonlijke
+          analyse.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-8">
+      {eligible.length > 0 ? (
+        <>
+          <header className="rounded-t-2xl border border-b-0 border-brand-green/30 bg-brand-greenLight px-5 py-4">
+            <h2 className="text-lg font-extrabold text-brand-greenDark">
+              Dit pand komt in aanmerking voor {eligible.length}{" "}
+              {eligible.length === 1 ? "regeling" : "regelingen"}
+            </h2>
+            <p className="mt-1 text-sm text-brand-greenDark/80">
+              Subsidiekansen voor dit pand — start een aanvraag wanneer u
+              er klaar voor bent.
+            </p>
+          </header>
+          <div className="grid gap-4 rounded-b-2xl border border-brand-green/30 bg-white p-5 sm:grid-cols-2">
+            {eligible.map((s) => (
+              <SubsidieCard key={s.code} subsidie={s} pandId={pandId} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <h2 className="text-lg font-extrabold text-amber-900">
+            Geen passende subsidies gevonden
+          </h2>
+          <p className="mt-2 text-sm text-amber-900/90">
+            Op basis van de pand gegevens hebben wij geen passende
+            subsidies gevonden. Neem contact op met AAA-Lex voor een
+            persoonlijke analyse.
+          </p>
+        </div>
+      )}
+
+      {nietEligible.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-gray-200 bg-white">
+          <button
+            type="button"
+            onClick={() => setShowNiet((v) => !v)}
+            aria-expanded={showNiet}
+            className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left text-sm font-semibold text-gray-700 hover:text-brand-green"
+          >
+            <span>
+              Regelingen waar dit pand niet voor in aanmerking komt
+              <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
+                {nietEligible.length}
+              </span>
+            </span>
+            <span
+              aria-hidden="true"
+              className={`flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-100 text-gray-500 transition ${
+                showNiet ? "rotate-45" : ""
+              }`}
+            >
+              +
+            </span>
+          </button>
+          {showNiet && (
+            <ul className="divide-y divide-gray-100 border-t border-gray-100">
+              {nietEligible.map((s) => (
+                <li key={s.code} className="px-5 py-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <RegelingBadge
+                      code={SUBSIDIE_REGELING_BADGE[s.code] || s.code}
+                    />
+                    <span className="font-semibold text-gray-800">
+                      {s.naam}
+                    </span>
+                  </div>
+                  {s.reden && (
+                    <p className="mt-1 text-xs text-gray-500">{s.reden}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function SubsidieCard({ subsidie, pandId }) {
+  const uitleg = deadlineUitleg(
+    subsidie.deadline_type,
+    subsidie.deadline_maanden,
+  );
+  return (
+    <article className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-brand-green hover:shadow-md">
+      <div className="flex items-center gap-2">
+        <RegelingBadge
+          code={SUBSIDIE_REGELING_BADGE[subsidie.code] || subsidie.code}
+        />
+        <h3 className="text-base font-bold text-gray-900">{subsidie.naam}</h3>
+      </div>
+      <p className="mt-2 text-sm text-gray-700">{subsidie.beschrijving}</p>
+
+      <dl className="mt-3 grid grid-cols-2 gap-y-1 text-xs text-gray-600">
+        {subsidie.max_subsidie != null && (
+          <>
+            <dt className="text-gray-400">Max. subsidie</dt>
+            <dd className="font-semibold text-gray-800">
+              {formatEuro(subsidie.max_subsidie)}
+            </dd>
+          </>
+        )}
+        <dt className="text-gray-400">Succesfee</dt>
+        <dd className="font-semibold text-gray-800">
+          {subsidie.fee_percentage}%
+        </dd>
+      </dl>
+
+      {uitleg && (
+        <p className="mt-3 rounded-md bg-brand-greenLight/60 px-3 py-2 text-xs font-medium text-brand-greenDark">
+          {uitleg}
+        </p>
+      )}
+
+      <div className="mt-auto pt-4">
+        <Link
+          to={`/panden/${pandId}/aanvraag/${subsidie.code}`}
+          className="btn-primary w-full justify-center !py-2 text-sm"
+        >
+          Aanvraag starten →
+        </Link>
+      </div>
+    </article>
   );
 }
 
