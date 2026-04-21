@@ -365,10 +365,94 @@ export default function Landing() {
                 <div className="uppercase tracking-wide text-gray-500">
                   Regelingen
                 </div>
-                <div className="mt-0.5 text-brand-green">{d.regelingen}</div>
-              </div>
+              <div className="mt-0.5 text-brand-green">{d.regelingen}</div>
             </div>
-          ))}
+          </div>
+        ))}
+        </div>
+      </section>
+
+      <section className="bg-white py-16">
+        <div className="container-app">
+          <div className="mb-12 max-w-2xl">
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
+              Van scan tot uitbetaling — wij regelen het
+            </h2>
+            <p className="mt-3 text-gray-600">
+              Drie stappen, geen verrassingen, geen kosten vooraf.
+            </p>
+          </div>
+
+          <ol className="grid gap-10 md:grid-cols-3 md:gap-0">
+            {[
+              {
+                num: "01",
+                titel: "Subsidiescan",
+                body: "U doet in 5 minuten de gratis subsidiecheck. Wij beoordelen uw kansen en sturen u een persoonlijke analyse van passende regelingen.",
+              },
+              {
+                num: "02",
+                titel: "Dossier & Indiening",
+                body: "U uploadt uw documenten via het platform. Wij controleren het dossier, bewaken alle deadlines en dienen in bij RVO namens u als erkend intermediair.",
+              },
+              {
+                num: "03",
+                titel: "Goedkeuring & Uitbetaling",
+                body: "RVO beslist binnen 13 weken. Bij goedkeuring ontvangt u de subsidie direct. Geen goedkeuring? Dan betaalt u niets — no cure, no pay.",
+              },
+            ].map((stap, idx, arr) => (
+              <li
+                key={stap.num}
+                className={`relative md:px-8 ${
+                  idx < arr.length - 1
+                    ? "md:border-r md:border-gray-200"
+                    : ""
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className="text-[64px] font-extrabold leading-none text-brand-green opacity-20"
+                >
+                  {stap.num}
+                </div>
+                <h3 className="mt-3 text-[20px] font-bold text-gray-900">
+                  {stap.titel}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                  {stap.body}
+                </p>
+
+                {idx < arr.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-[-14px] top-10 hidden h-7 w-7 items-center justify-center text-gray-300 md:flex"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="M13 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-12">
+            <Link
+              to="/hoe-het-werkt"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:underline"
+            >
+              Lees hoe het precies werkt →
+            </Link>
+          </div>
         </div>
       </section>
 
