@@ -52,16 +52,61 @@ const regelingen = [
 
 const trustItems = [
   {
-    title: "RVO-erkend intermediair",
-    body: "Ervaren met aanvragen via mijn.rvo.nl en eHerkenning niveau 2+.",
+    title: "No cure, no pay",
+    body: "U betaalt alleen bij succes — wordt er niets toegekend, dan betaalt u niets.",
   },
   {
     title: "Gemiddeld 5–6 weken doorlooptijd",
-    body: "Van intake tot indiening bij RVO — wij bewaken alle deadlines.",
+    body: "Van intake tot indiening bij RVO — snel, zorgvuldig en volledig.",
   },
   {
-    title: "Betaal alleen bij succes",
-    body: "Onze succesfee is een transparant percentage van het toegekende bedrag.",
+    title: "Alle deadlines bewaakt",
+    body: "AAA-Lex houdt elke indientermijn in de gaten, per regeling en per dossier.",
+  },
+];
+
+const werkwijzeStappen = [
+  {
+    nummer: "01",
+    titel: "Onderzoeken",
+    body: "Gratis subsidiescan — wij brengen uw kansen in kaart. U ontvangt een indicatieve analyse van de regelingen die op uw situatie van toepassing zijn.",
+  },
+  {
+    nummer: "02",
+    titel: "Aanvragen",
+    body: "Wij bouwen het dossier op en dienen in bij RVO namens u als erkend intermediair. Alle deadlines en indientermijnen bewaken wij automatisch.",
+  },
+  {
+    nummer: "03",
+    titel: "Verantwoorden",
+    body: "Wij monitoren het proces na indiening. Bij goedkeuring ontvangt u de subsidie; AAA-Lex ontvangt dan pas de succesfee.",
+  },
+];
+
+const doelgroepen = [
+  {
+    icon: "🏠",
+    titel: "Woningen",
+    beschrijving: "Eigenaar-bewoners en particuliere verhuurders.",
+    regelingen: "ISDE warmtepomp, ISDE isolatie",
+  },
+  {
+    icon: "🏢",
+    titel: "Commercieel vastgoed",
+    beschrijving: "Kantoren en bedrijfspanden.",
+    regelingen: "EIA, MIA/Vamil",
+  },
+  {
+    icon: "🏛️",
+    titel: "Maatschappelijk vastgoed",
+    beschrijving: "Zorg, onderwijs, sport en gemeenten.",
+    regelingen: "DUMAVA (tot €1,5M per gebouw)",
+  },
+  {
+    icon: "🏘️",
+    titel: "VvE's",
+    beschrijving: "Verenigingen van Eigenaren.",
+    regelingen: "SVVE, ISDE",
   },
 ];
 
@@ -248,36 +293,114 @@ export default function Landing() {
       </section>
 
       <section className="bg-gray-50 py-16">
-        <div className="container-app grid gap-6 md:grid-cols-3">
-          <div className="rounded-xl bg-white p-6 ring-1 ring-black/5">
-            <div className="text-3xl font-extrabold text-brand-green">1.</div>
-            <h3 className="mt-2 text-lg font-bold text-gray-900">
-              Doe de subsidiecheck
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Vul in 5 stappen uw situatie in en ontvang direct een
-              overzicht van passende regelingen.
+        <div className="container-app">
+          <div className="mb-10 max-w-2xl">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Subsidie zonder zorgen — wij regelen het
+            </h2>
+            <p className="mt-3 text-gray-600">
+              In drie fases van scan tot uitbetaling. U levert de documenten,
+              AAA-Lex bouwt en dient het dossier in.
             </p>
           </div>
-          <div className="rounded-xl bg-white p-6 ring-1 ring-black/5">
-            <div className="text-3xl font-extrabold text-brand-green">2.</div>
-            <h3 className="mt-2 text-lg font-bold text-gray-900">
-              Wij regelen het dossier
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Upload uw documenten. Wij controleren, vullen aan en dienen
-              in bij RVO binnen de geldende termijnen.
+          <div className="grid gap-5 md:grid-cols-3">
+            {werkwijzeStappen.map((s) => (
+              <div
+                key={s.nummer}
+                className="relative rounded-xl bg-white p-6 ring-1 ring-black/5"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand-green text-sm font-extrabold tracking-wide text-white">
+                    {s.nummer}
+                  </span>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {s.titel}
+                  </h3>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-gray-700">
+                  {s.body}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8">
+            <Link
+              to="/hoe-het-werkt"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:underline"
+            >
+              Bekijk de volledige werkwijze →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="container-app py-16">
+        <div className="mb-10 max-w-2xl">
+          <h2 className="text-3xl font-bold text-gray-900">
+            Voor welk vastgoed regelen wij subsidies?
+          </h2>
+          <p className="mt-3 text-gray-600">
+            Van particuliere woningen tot grote maatschappelijke
+            vastgoedportefeuilles — wij kennen de regelingen die bij uw
+            situatie horen.
+          </p>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {doelgroepen.map((d) => (
+            <div
+              key={d.titel}
+              className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 transition hover:border-brand-green hover:shadow-md"
+            >
+              <div
+                aria-hidden="true"
+                className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-greenLight text-2xl"
+              >
+                {d.icon}
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-gray-900">
+                {d.titel}
+              </h3>
+              <p className="mt-2 text-sm text-gray-700">{d.beschrijving}</p>
+              <div className="mt-4 rounded-md bg-gray-50 p-3 text-xs font-semibold text-gray-700">
+                <div className="uppercase tracking-wide text-gray-500">
+                  Regelingen
+                </div>
+                <div className="mt-0.5 text-brand-green">{d.regelingen}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-brand-green py-16 text-white">
+        <div className="container-app grid items-center gap-8 md:grid-cols-[2fr_1fr]">
+          <div>
+            <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+              Deadlines
+            </span>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+              Mis nooit een deadline
+            </h2>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/90">
+              Voor zakelijke ISDE moet u aanvragen vóór de offerte. Voor
+              particuliere ISDE heeft u 24 maanden na installatie. EIA en
+              MIA/Vamil: aanvragen binnen 3 maanden na offerte. Ons
+              platform bewaakt dit automatisch voor u.
             </p>
           </div>
-          <div className="rounded-xl bg-white p-6 ring-1 ring-black/5">
-            <div className="text-3xl font-extrabold text-brand-green">3.</div>
-            <h3 className="mt-2 text-lg font-bold text-gray-900">
-              U ontvangt de subsidie
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Na toekenning ontvangt u de subsidie. Onze succesfee is een
-              percentage van het toegekende bedrag.
-            </p>
+          <div className="flex flex-col items-start gap-3 md:items-end">
+            <Link
+              to="/subsidiecheck"
+              className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-green transition hover:bg-white/90"
+            >
+              Start gratis subsidiecheck
+            </Link>
+            <Link
+              to="/hoe-het-werkt"
+              className="text-sm font-semibold text-white/90 hover:text-white hover:underline"
+            >
+              Bekijk alle deadlines per regeling →
+            </Link>
           </div>
         </div>
       </section>

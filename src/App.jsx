@@ -6,6 +6,7 @@ import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AanvraagDetail from "./pages/AanvraagDetail.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import HoeHetWerkt from "./pages/HoeHetWerkt.jsx";
 import Landing from "./pages/Landing.jsx";
 import NieuweAanvraag from "./pages/NieuweAanvraag.jsx";
 import NotFound from "./pages/NotFound.jsx";
@@ -32,6 +33,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Landing />} />
         <Route path="/subsidiecheck" element={<SubsidieCheck />} />
+        <Route path="/hoe-het-werkt" element={<HoeHetWerkt />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />

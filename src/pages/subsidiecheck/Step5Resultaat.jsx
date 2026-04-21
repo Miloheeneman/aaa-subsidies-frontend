@@ -147,6 +147,15 @@ export default function Step5Resultaat({ payload }) {
   const applicable = data.regelingen.filter((r) => r.van_toepassing);
   const notApplicable = data.regelingen.filter((r) => !r.van_toepassing);
 
+  // Lokale, frontend-only waarschuwing: ISDE is in principe alleen
+  // beschikbaar voor woningen met bouwjaar < 2019. De backend kan dit
+  // ook meegeven via waarschuwingen[] maar we tonen het hier expliciet
+  // zodat de klant direct de reden ziet als de code toch verschijnt.
+  const bouwjaar = Number(payload?.bouwjaar);
+  const hasIsde = applicable.some((r) => r.code === "ISDE");
+  const showBouwjaarWarning =
+    Number.isFinite(bouwjaar) && bouwjaar >= 2019 && hasIsde;
+
   return (
     <div className="grid gap-5">
       {applicable.length === 0 ? (
@@ -186,13 +195,19 @@ export default function Step5Resultaat({ payload }) {
         </div>
       )}
 
-      {data.waarschuwingen?.length > 0 && (
+      {(data.waarschuwingen?.length > 0 || showBouwjaarWarning) && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           <div className="mb-2 font-semibold">Belangrijk om te weten</div>
           <ul className="list-disc space-y-1 pl-5">
-            {data.waarschuwingen.map((w, i) => (
-              <li key={i}>{w}</li>
-            ))}
+            {showBouwjaarWarning && (
+              <li>
+                <strong>Bouwjaar na 2019:</strong> ISDE is in beginsel
+                alleen beschikbaar voor woningen van vóór 2019. Wij
+                controleren uw situatie en bespreken alternatieven indien
+                nodig.
+              </li>
+            )}
+            {data.waarschuwingen?.map((w, i) => <li key={i}>{w}</li>)}
           </ul>
         </div>
       )}
@@ -231,6 +246,12 @@ export default function Step5Resultaat({ payload }) {
           </ul>
         </details>
       )}
+
+      <p className="pt-2 text-xs leading-relaxed text-gray-500">
+        Dit is een indicatieve berekening. Aan deze berekening kunnen geen
+        rechten worden ontleend. De definitieve subsidie wordt bepaald door
+        RVO.
+      </p>
     </div>
   );
 }

@@ -11,7 +11,13 @@ import WizardShell from "./subsidiecheck/WizardShell.jsx";
 const EMPTY_STATE = {
   type_aanvrager: null,
   maatregelen: [],
-  pand: { postcode: "", bouwjaar: "", energielabel: "", type_pand: null },
+  pand: {
+    postcode: "",
+    bouwjaar: "",
+    energielabel: "",
+    type_pand: null,
+    type_eigenaar: null,
+  },
   investering: {
     investering_bedrag: "",
     offerte_beschikbaar: false,
@@ -26,7 +32,12 @@ export default function SubsidieCheck() {
   const canContinue = useMemo(() => {
     if (step === 1) return Boolean(state.type_aanvrager);
     if (step === 2) return state.maatregelen.length > 0;
-    if (step === 3) return true;
+    if (step === 3) {
+      const bj = state.pand.bouwjaar;
+      const bouwjaarOk =
+        bj !== "" && bj !== null && Number.isFinite(Number(bj));
+      return bouwjaarOk && Boolean(state.pand.type_eigenaar);
+    }
     if (step === 4) return true;
     return true;
   }, [step, state]);

@@ -6,18 +6,21 @@ const OPTIONS = [
     title: "Warmtepomp",
     description: "Lucht/water, water/water of hybride.",
     icon: "♨️",
+    hint: "Nieuw apparaat, geïnstalleerd door een gecertificeerd installateur vereist.",
   },
   {
     id: "isolatie",
     title: "Isolatie",
     description: "Dak, gevel, vloer of HR++ glas.",
     icon: "🧱",
+    hint: "Foto's tijdens de werkzaamheden verplicht — naam, merk en dikte van het materiaal moeten zichtbaar zijn.",
   },
   {
     id: "energiesysteem",
     title: "Energiezuinig systeem",
     description: "LED-verlichting, efficiënte installaties.",
     icon: "💡",
+    hint: "EIA — vraag aan VÓÓR u de offerte ondertekent.",
   },
   {
     id: "meerdere",
@@ -42,6 +45,10 @@ export default function Step2Maatregelen({ value, onChange }) {
     }
   }
 
+  const hints = OPTIONS.filter(
+    (o) => o.hint && value.includes(o.id),
+  );
+
   return (
     <div>
       <p className="mb-4 text-sm text-gray-600">
@@ -59,6 +66,29 @@ export default function Step2Maatregelen({ value, onChange }) {
           />
         ))}
       </div>
+
+      {hints.length > 0 && (
+        <div className="mt-5 rounded-lg border border-brand-green/20 bg-brand-greenLight/60 p-4 text-sm text-gray-800">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-green">
+            Let op bij uw selectie
+          </div>
+          <ul className="space-y-1.5">
+            {hints.map((h) => (
+              <li key={h.id} className="flex items-start gap-2">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white text-xs font-bold text-brand-green"
+                >
+                  !
+                </span>
+                <span>
+                  <span className="font-semibold">{h.title}:</span> {h.hint}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
 const publicLinks = [
   { to: "/", label: "Home", end: true },
   { to: "/subsidiecheck", label: "Subsidiecheck" },
+  { to: "/hoe-het-werkt", label: "Hoe het werkt" },
 ];
 
 const klantLinks = [
