@@ -160,6 +160,14 @@ export async function submitIsdeWarmtepompAanvraag(pandId, body) {
   return data;
 }
 
+export async function submitIsdeIsolatieAanvraag(pandId, body) {
+  const { data } = await api.post(
+    `/panden/${pandId}/aanvragen/isde-isolatie`,
+    body,
+  );
+  return data;
+}
+
 export async function getMaatregel(id) {
   const { data } = await api.get(`/maatregelen/${id}`);
   return data;

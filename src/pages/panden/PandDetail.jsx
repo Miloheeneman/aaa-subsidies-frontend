@@ -591,7 +591,9 @@ function SubsidieCard({ subsidie, pandId }) {
           to={
             subsidie.code === "ISDE_WARMTEPOMP"
               ? `/panden/${pandId}/aanvragen/isde-warmtepomp`
-              : `/panden/${pandId}`
+              : subsidie.code === "ISDE_ISOLATIE"
+                ? `/panden/${pandId}/aanvragen/isde-isolatie`
+                : `/panden/${pandId}`
           }
           className="btn-primary w-full justify-center !py-2 text-sm"
         >
