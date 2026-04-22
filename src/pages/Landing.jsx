@@ -161,21 +161,21 @@ export default function Landing() {
             cx="12%"
             cy="22%"
             r="130"
-            fill="rgba(45,106,45,0.06)"
+            fill="rgba(90,158,30,0.06)"
             className="hero-float-a"
           />
           <circle
             cx="88%"
             cy="18%"
             r="90"
-            fill="rgba(45,106,45,0.06)"
+            fill="rgba(90,158,30,0.06)"
             className="hero-float-b"
           />
           <circle
             cx="72%"
             cy="82%"
             r="170"
-            fill="rgba(45,106,45,0.06)"
+            fill="rgba(90,158,30,0.06)"
             className="hero-float-c"
           />
         </svg>

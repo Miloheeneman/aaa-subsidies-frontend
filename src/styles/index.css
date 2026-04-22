@@ -88,10 +88,10 @@
   @keyframes cta-pulse {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(45, 106, 45, 0.35);
+      box-shadow: 0 0 0 0 rgba(90, 158, 30, 0.35);
     }
     50% {
-      box-shadow: 0 0 0 10px rgba(45, 106, 45, 0);
+      box-shadow: 0 0 0 10px rgba(90, 158, 30, 0);
     }
   }
   .anim-cta-pulse {

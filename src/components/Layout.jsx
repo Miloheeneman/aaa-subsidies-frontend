@@ -66,10 +66,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <header
-        className="border-b border-white/20"
-        style={{ backgroundColor: "#5a9e1e" }}
-      >
+      <header className="border-b border-white/20 bg-brand-green">
         <div className="container-app flex min-h-16 items-center justify-between gap-4 py-2">
           <Link to="/" className="flex shrink-0 items-center">
             <img
@@ -117,7 +114,7 @@ export default function Layout() {
                 <button
                   type="button"
                   onClick={logout}
-                  className="rounded-lg border border-white px-4 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-[#5a9e1e]"
+                  className="rounded-lg border border-white px-4 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-brand-green"
                 >
                   Uitloggen
                 </button>
@@ -132,7 +129,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/subsidiecheck"
-                  className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#5a9e1e] transition hover:bg-white/90"
+                  className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-brand-green transition hover:bg-white/90"
                 >
                   Subsidiecheck
                 </Link>
