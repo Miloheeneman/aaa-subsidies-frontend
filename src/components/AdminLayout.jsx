@@ -34,10 +34,7 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f4f7f4]">
-      <header
-        className="border-b border-black/10 text-white"
-        style={{ backgroundColor: "#1a3a1a" }}
-      >
+      <header className="border-b border-white/20 bg-[#5a9e1e] text-white">
         <div className="flex min-h-14 items-center justify-between gap-4 px-4 py-2 sm:px-6">
           <div className="flex min-w-0 items-center gap-4">
             <Link to="/admin" className="flex shrink-0 items-center gap-2">

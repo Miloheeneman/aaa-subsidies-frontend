@@ -63,7 +63,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <header className="border-b border-white/20 bg-brand-green">
+      <header className="border-b border-white/20 bg-[#5a9e1e] text-white">
         <div className="container-app flex min-h-16 items-center justify-between gap-4 py-2">
           <Link to="/" className="flex shrink-0 items-center">
             <img
