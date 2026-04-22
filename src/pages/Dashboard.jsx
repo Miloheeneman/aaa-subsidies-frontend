@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import StatusBadge, { RegelingBadge } from "../components/StatusBadge.jsx";
 import DeadlineBadge, {
   EnergielabelBadge,
-} from "../components/panden/DeadlineBadge.jsx";
+} from "../components/projecten/DeadlineBadge.jsx";
 import { api, apiErrorMessage } from "../lib/api.js";
 import { setCachedMe } from "../lib/auth.js";
 import {
@@ -13,7 +13,7 @@ import {
   daysUntil,
   maatregelLabel,
 } from "../lib/formatters.js";
-import { listPanden, pandTypeLabel } from "../lib/panden.js";
+import { listProjecten, projectTypeLabel } from "../lib/projecten.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -92,8 +92,8 @@ function DeadlineCell({ datum }) {
 export default function Dashboard() {
   const [me, setMe] = useState(null);
   const [aanvragen, setAanvragen] = useState([]);
-  const [panden, setPanden] = useState([]);
-  const [pandenQuota, setPandenQuota] = useState(null);
+  const [projecten, setProjecten] = useState([]);
+  const [projectenQuota, setProjectenQuota] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -102,15 +102,15 @@ export default function Dashboard() {
     Promise.all([
       api.get("/auth/me"),
       api.get("/aanvragen"),
-      listPanden().catch(() => ({ items: [], quota: null })),
+      listProjecten().catch(() => ({ items: [], quota: null })),
     ])
-      .then(([meRes, aanRes, pandRes]) => {
+      .then(([meRes, aanRes, projectRes]) => {
         if (cancelled) return;
         setMe(meRes.data);
         setCachedMe(meRes.data);
         setAanvragen(aanRes.data ?? []);
-        setPanden(pandRes.items ?? []);
-        setPandenQuota(pandRes.quota ?? null);
+        setProjecten(projectRes.items ?? []);
+        setProjectenQuota(projectRes.quota ?? null);
         setLoading(false);
       })
       .catch((err) => {
@@ -193,7 +193,7 @@ export default function Dashboard() {
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-green/30 bg-brand-greenLight px-4 py-3 text-sm text-brand-greenDark">
           <span>
             <strong className="font-semibold">U gebruikt het Gratis plan.</strong>{" "}
-            Upgrade voor meer panden en extra functies.
+            Upgrade voor meer projecten en extra functies.
           </span>
           <Link
             to="/onboarding/plan"
@@ -226,22 +226,22 @@ export default function Dashboard() {
 
       <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-gray-100 p-5">
-          <h2 className="text-lg font-bold text-gray-900">Mijn panden</h2>
+          <h2 className="text-lg font-bold text-gray-900">Mijn projecten</h2>
           <div className="flex items-center gap-3 text-sm">
-            {pandenQuota && (
+            {projectenQuota && (
               <span className="hidden text-xs text-gray-500 sm:inline">
-                {pandenQuota.used}
-                {pandenQuota.limit !== null && ` / ${pandenQuota.limit}`} panden
+                {projectenQuota.used}
+                {projectenQuota.limit !== null && ` / ${projectenQuota.limit}`} projecten
               </span>
             )}
             <Link
-              to="/panden/nieuw"
+              to="/projecten/nieuw"
               className="font-semibold text-brand-green hover:underline"
             >
-              + Pand toevoegen
+              + Project toevoegen
             </Link>
             <Link
-              to="/panden"
+              to="/projecten"
               className="font-semibold text-brand-green hover:underline"
             >
               Alles →
@@ -249,47 +249,47 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {pandenQuota &&
-          pandenQuota.limit !== null &&
-          pandenQuota.remaining !== null &&
-          pandenQuota.remaining <= 1 &&
-          !pandenQuota.exceeded && (
+        {projectenQuota &&
+          projectenQuota.limit !== null &&
+          projectenQuota.remaining !== null &&
+          projectenQuota.remaining <= 1 &&
+          !projectenQuota.exceeded && (
             <div className="border-b border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-900">
               U heeft nog{" "}
               <strong>
-                {pandenQuota.remaining} pand
-                {pandenQuota.remaining === 1 ? "" : "en"}
+                {projectenQuota.remaining}{" "}
+                {projectenQuota.remaining === 1 ? "project" : "projecten"}
               </strong>{" "}
               over in uw huidige plan.{" "}
               <Link
                 to="/onboarding/plan"
                 className="font-semibold underline hover:text-amber-950"
               >
-                Upgrade voor meer panden →
+                Upgrade voor meer projecten →
               </Link>
             </div>
           )}
-        {panden.length === 0 ? (
+        {projecten.length === 0 ? (
           <div className="grid place-items-center gap-4 px-5 py-10 text-center">
             <div className="text-5xl" aria-hidden>
               🏠
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
-                U heeft nog geen panden
+                U heeft nog geen projecten
               </h3>
               <p className="mt-1 max-w-md text-sm text-gray-600">
-                Voeg uw eerste pand toe om maatregelen en subsidiekansen
-                per pand te registreren.
+                Voeg uw eerste project toe om maatregelen en subsidiekansen
+                per project te registreren.
               </p>
             </div>
-            <Link to="/panden/nieuw" className="btn-primary">
-              + Pand toevoegen
+            <Link to="/projecten/nieuw" className="btn-primary">
+              + Project toevoegen
             </Link>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {panden.slice(0, 4).map((p) => (
+            {projecten.slice(0, 4).map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
                 <EnergielabelBadge label={p.energielabel_huidig} />
                 <div className="min-w-0 flex-1">
@@ -297,14 +297,14 @@ export default function Dashboard() {
                     {p.straat} {p.huisnummer}, {p.plaats}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {pandTypeLabel(p.pand_type)} · Bouwjaar {p.bouwjaar} ·{" "}
+                    {projectTypeLabel(p.project_type)} · Bouwjaar {p.bouwjaar} ·{" "}
                     {p.aantal_maatregelen} maatregel
                     {p.aantal_maatregelen === 1 ? "" : "en"}
                   </div>
                 </div>
                 <DeadlineBadge status={p.worst_deadline_status} />
                 <Link
-                  to={`/panden/${p.id}`}
+                  to={`/projecten/${p.id}`}
                   className="text-sm font-semibold text-brand-green hover:underline"
                 >
                   Bekijken →

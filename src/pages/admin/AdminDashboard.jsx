@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import StatusBadge, { RegelingBadge } from "../../components/StatusBadge.jsx";
-import KritiekeDeadlinesWidget from "../../components/panden/KritiekeDeadlinesWidget.jsx";
+import KritiekeDeadlinesWidget from "../../components/projecten/KritiekeDeadlinesWidget.jsx";
 import api, { apiErrorMessage } from "../../lib/api.js";
 import {
   daysUntil,
@@ -94,8 +94,8 @@ export default function AdminDashboard() {
           <Link to="/admin/aanvragen" className="btn-secondary !py-2 !px-4 text-sm">
             Alle aanvragen
           </Link>
-          <Link to="/admin/panden" className="btn-secondary !py-2 !px-4 text-sm">
-            Panden
+          <Link to="/admin/projecten" className="btn-secondary !py-2 !px-4 text-sm">
+            Projecten
           </Link>
           <Link to="/admin/klanten" className="btn-primary !py-2 !px-4 text-sm">
             Klanten

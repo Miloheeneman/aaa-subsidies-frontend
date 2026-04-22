@@ -7,7 +7,7 @@ import {
   MAATREGEL_GROEPEN,
   createMaatregel,
   maatregelLabel,
-} from "../../lib/panden.js";
+} from "../../lib/projecten.js";
 
 /**
  * 3-staps modal voor het aanmaken van een Maatregel.
@@ -16,7 +16,7 @@ import {
  * 2. Details invullen (velden schalen op het type — warmtepomp vs EIA).
  * 3. Overzicht + bevestigen (toont berekende deadline en geschatte subsidie).
  */
-export default function NieuweMaatregelModal({ pand, onClose, onCreated }) {
+export default function NieuweMaatregelModal({ project, onClose, onCreated }) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -87,7 +87,7 @@ export default function NieuweMaatregelModal({ pand, onClose, onCreated }) {
           ? Number(form.geschatte_subsidie)
           : null,
       };
-      const created = await createMaatregel(pand.id, body);
+      const created = await createMaatregel(project.id, body);
       onCreated?.(created);
     } catch (e) {
       setError(apiErrorMessage(e, "Opslaan mislukt"));

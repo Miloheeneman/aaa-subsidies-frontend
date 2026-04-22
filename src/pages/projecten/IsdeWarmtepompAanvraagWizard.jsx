@@ -5,10 +5,10 @@ import PageMeta from "../../components/PageMeta.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
 import { formatDate, formatEuro } from "../../lib/formatters.js";
 import {
-  getPand,
+  getProject,
   maatregelLabel,
   submitIsdeWarmtepompAanvraag,
-} from "../../lib/panden.js";
+} from "../../lib/projecten.js";
 
 const WARMTEPOMP_OPTIES = [
   {
@@ -69,9 +69,9 @@ const initialForm = {
 };
 
 export default function IsdeWarmtepompAanvraagWizard() {
-  const { pandId } = useParams();
+  const { projectId } = useParams();
   const navigate = useNavigate();
-  const [pand, setPand] = useState(null);
+  const [project, setProject] = useState(null);
   const [loadErr, setLoadErr] = useState(null);
   const [phase, setPhase] = useState(1);
   const [form, setForm] = useState(initialForm);
@@ -84,9 +84,9 @@ export default function IsdeWarmtepompAanvraagWizard() {
     let cancelled = false;
     (async () => {
       try {
-        const data = await getPand(pandId);
+        const data = await getProject(projectId);
         if (!cancelled) {
-          setPand(data);
+          setProject(data);
           setLoadErr(null);
         }
       } catch (e) {
@@ -96,7 +96,7 @@ export default function IsdeWarmtepompAanvraagWizard() {
     return () => {
       cancelled = true;
     };
-  }, [pandId]);
+  }, [projectId]);
 
   const progressStep = useMemo(() => {
     if (phase === "orient_info") return 1;
@@ -104,8 +104,8 @@ export default function IsdeWarmtepompAanvraagWizard() {
     return 5;
   }, [phase]);
 
-  const adresLabel = pand
-    ? `${pand.straat} ${pand.huisnummer}, ${pand.postcode} ${pand.plaats}`
+  const adresLabel = project
+    ? `${project.straat} ${project.huisnummer}, ${project.postcode} ${project.plaats}`
     : "…";
 
   function setF(field, value) {
@@ -122,7 +122,7 @@ export default function IsdeWarmtepompAanvraagWizard() {
       if (form.situatie === "orienteren") setPhase("orient_info");
       else setPhase(1);
     } else if (phase === "orient_info") setPhase(1);
-    else navigate(`/panden/${pandId}`);
+    else navigate(`/projecten/${projectId}`);
   }
 
   const geschatteSubsidie = estimateWarmtepompSubsidie(form.warmtepomp_subtype);
@@ -154,7 +154,7 @@ export default function IsdeWarmtepompAanvraagWizard() {
         offerte_datum:
           form.heeft_offerte && form.offerte_datum ? form.offerte_datum : null,
       };
-      const m = await submitIsdeWarmtepompAanvraag(pandId, body);
+      const m = await submitIsdeWarmtepompAanvraag(projectId, body);
       setCreated(m);
       setPhase("done");
     } catch (e) {
@@ -171,10 +171,10 @@ export default function IsdeWarmtepompAanvraagWizard() {
           {loadErr}
         </div>
         <Link
-          to={`/panden/${pandId}`}
+          to={`/projecten/${projectId}`}
           className="mt-4 inline-block text-sm font-semibold text-brand-green hover:underline"
         >
-          ← Terug naar pand
+          ← Terug naar project
         </Link>
       </div>
     );
@@ -185,12 +185,12 @@ export default function IsdeWarmtepompAanvraagWizard() {
       <PageMeta title="ISDE warmtepomp aanvraag" />
 
       <nav className="text-xs text-gray-500 sm:text-sm">
-        <Link to="/panden" className="font-semibold text-brand-green hover:underline">
-          Mijn panden
+        <Link to="/projecten" className="font-semibold text-brand-green hover:underline">
+          Mijn projecten
         </Link>
         <span className="mx-2 text-gray-300">→</span>
         <Link
-          to={`/panden/${pandId}`}
+          to={`/projecten/${projectId}`}
           className="font-semibold text-brand-green hover:underline"
         >
           {adresLabel}
@@ -290,7 +290,7 @@ export default function IsdeWarmtepompAanvraagWizard() {
           <StepDone
             form={form}
             maatregel={created}
-            pandId={pandId}
+            projectId={projectId}
           />
         )}
       </div>
@@ -760,7 +760,7 @@ function Step5Confirm({
   );
 }
 
-function StepDone({ form, maatregel, pandId }) {
+function StepDone({ form, maatregel, projectId }) {
   const deadline =
     maatregel.deadline_indienen != null
       ? formatDate(maatregel.deadline_indienen)
@@ -826,10 +826,10 @@ function StepDone({ form, maatregel, pandId }) {
       </p>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Link to="/panden" className="btn-secondary sm:!px-8">
-          Terug naar pand overzicht
+        <Link to="/projecten" className="btn-secondary sm:!px-8">
+          Terug naar projectoverzicht
         </Link>
-        <Link to={`/panden/${pandId}`} className="btn-primary sm:!px-8">
+        <Link to={`/projecten/${projectId}`} className="btn-primary sm:!px-8">
           Nog een maatregel toevoegen
         </Link>
       </div>

@@ -18,7 +18,7 @@ const PLANS = [
     prijs: "€0",
     interval: "per maand",
     highlights: [
-      { label: "3 panden", included: true },
+      { label: "3 projecten", included: true },
       { label: "1 gebruiker", included: true },
       { label: "Alle subsidiechecks", included: true },
       { label: "Documentbeheer", included: true },
@@ -31,7 +31,7 @@ const PLANS = [
     prijs: "€39",
     interval: "per maand",
     highlights: [
-      { label: "30 panden", included: true },
+      { label: "30 projecten", included: true },
       { label: "2 gebruikers", included: true },
       { label: "Alles van Gratis", included: true },
       { label: "E-mail support", included: true },
@@ -46,7 +46,7 @@ const PLANS = [
     badge: "Meest gekozen",
     featured: true,
     highlights: [
-      { label: "100 panden", included: true },
+      { label: "100 projecten", included: true },
       { label: "5 gebruikers", included: true },
       { label: "Prioriteit in wachtrij", included: true },
       { label: "Dedicated accountmanager", included: true },
@@ -59,7 +59,7 @@ const PLANS = [
     prijs: "Op aanvraag",
     interval: "",
     highlights: [
-      { label: "Onbeperkt aantal panden", included: true },
+      { label: "Onbeperkt aantal projecten", included: true },
       { label: "Onbeperkt aantal gebruikers", included: true },
       { label: "SSO / SAML", included: true },
       { label: "Maatwerk SLA", included: true },

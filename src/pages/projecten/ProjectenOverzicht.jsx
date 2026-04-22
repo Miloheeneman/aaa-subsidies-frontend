@@ -4,22 +4,22 @@ import { Link } from "react-router-dom";
 import EmptyState from "../../components/EmptyState.jsx";
 import DeadlineBadge, {
   EnergielabelBadge,
-} from "../../components/panden/DeadlineBadge.jsx";
-import UpgradeModal from "../../components/panden/UpgradeModal.jsx";
+} from "../../components/projecten/DeadlineBadge.jsx";
+import UpgradeModal from "../../components/projecten/UpgradeModal.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
 import {
   eigenaarTypeLabel,
-  listPanden,
-  pandTypeLabel,
-} from "../../lib/panden.js";
+  listProjecten,
+  projectTypeLabel,
+} from "../../lib/projecten.js";
 
-export default function PandenOverzicht() {
+export default function ProjectenOverzicht() {
   const [state, setState] = useState({ loading: true });
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    listPanden()
+    listProjecten()
       .then((data) => !cancelled && setState({ loading: false, data }))
       .catch(
         (e) =>
@@ -51,7 +51,7 @@ export default function PandenOverzicht() {
   const { items = [], quota } = state.data;
   const canAdd = quota?.limit === null || !quota?.exceeded;
 
-  function handleNewPand(e) {
+  function handleNewProject(e) {
     if (!canAdd) {
       e.preventDefault();
       setShowUpgrade(true);
@@ -63,7 +63,7 @@ export default function PandenOverzicht() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-            Mijn panden
+            Mijn projecten
           </h1>
           <p className="mt-1 text-sm text-gray-600">
             Overzicht van al uw vastgoedobjecten en de bijbehorende
@@ -73,29 +73,29 @@ export default function PandenOverzicht() {
         <div className="flex items-center gap-2">
           {quota && (
             <span className="hidden text-xs text-gray-500 sm:inline">
-              Panden gebruikt: {quota.used}
+              Projecten gebruikt: {quota.used}
               {quota.limit !== null && ` / ${quota.limit}`}
             </span>
           )}
           <Link
-            to="/panden/nieuw"
-            onClick={handleNewPand}
+            to="/projecten/nieuw"
+            onClick={handleNewProject}
             className="btn-primary"
           >
-            + Nieuw pand
+            + Nieuw project
           </Link>
         </div>
       </div>
 
       {quota?.exceeded && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          U heeft het maximum aantal panden van uw {quota.plan}-plan bereikt
+          U heeft het maximum aantal projecten van uw {quota.plan}-plan bereikt
           ({quota.limit}).{" "}
           <Link
             to="/onboarding/plan"
             className="font-semibold underline hover:no-underline"
           >
-            Upgrade om meer panden toe te voegen
+            Upgrade om meer projecten toe te voegen
           </Link>
           .
         </div>
@@ -104,11 +104,11 @@ export default function PandenOverzicht() {
       {items.length === 0 ? (
         <div className="mt-8">
           <EmptyState
-            title="U heeft nog geen panden"
-            description="Voeg uw eerste pand toe om subsidiekansen te ontdekken."
+            title="U heeft nog geen projecten"
+            description="Voeg uw eerste project toe om subsidiekansen te ontdekken."
             action={
-              <Link to="/panden/nieuw" className="btn-primary">
-                Voeg pand toe
+              <Link to="/projecten/nieuw" className="btn-primary">
+                Voeg project toe
               </Link>
             }
           />
@@ -118,7 +118,7 @@ export default function PandenOverzicht() {
           {items.map((p) => (
             <Link
               key={p.id}
-              to={`/panden/${p.id}`}
+              to={`/projecten/${p.id}`}
               className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-brand-green/40 hover:shadow"
             >
               <div className="flex items-start justify-between gap-3">
@@ -136,7 +136,7 @@ export default function PandenOverzicht() {
               <dl className="mt-4 grid grid-cols-2 gap-y-1 text-xs text-gray-600">
                 <dt className="text-gray-400">Type</dt>
                 <dd className="font-medium text-gray-700">
-                  {pandTypeLabel(p.pand_type)}
+                  {projectTypeLabel(p.project_type)}
                 </dd>
                 <dt className="text-gray-400">Eigenaar</dt>
                 <dd className="font-medium text-gray-700">

@@ -1,9 +1,9 @@
 const LABELS = ["A+++", "A++", "A+", "A", "B", "C", "D", "E", "F", "G"];
 
-const PAND_TYPES = [
+const PROJECT_TYPES = [
   { id: "woning", label: "Woning" },
   { id: "bedrijfspand", label: "Bedrijfspand" },
-  { id: "maatschappelijk", label: "Maatschappelijk pand" },
+  { id: "maatschappelijk", label: "Maatschappelijk gebouw" },
 ];
 
 const EIGENAAR_TYPES = [
@@ -38,7 +38,7 @@ export default function Step3Pand({ value, onChange }) {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-semibold text-gray-800">
-            Bouwjaar pand{" "}
+            Bouwjaar{" "}
             <span className="font-normal text-brand-green">*</span>
           </label>
           <input
@@ -80,10 +80,10 @@ export default function Step3Pand({ value, onChange }) {
 
       <fieldset>
         <legend className="text-sm font-semibold text-gray-800">
-          Type pand
+          Type gebouw
         </legend>
         <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          {PAND_TYPES.map((t) => (
+          {PROJECT_TYPES.map((t) => (
             <label
               key={t.id}
               className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 text-sm transition ${

@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import UpgradeModal from "../../components/panden/UpgradeModal.jsx";
+import UpgradeModal from "../../components/projecten/UpgradeModal.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
 import {
   EIGENAAR_TYPES,
-  PAND_TYPES,
-  createPand,
-} from "../../lib/panden.js";
+  PROJECT_TYPES,
+  createProject,
+} from "../../lib/projecten.js";
 
 const POSTCODE_RE = /^[1-9]\d{3}\s?[A-Za-z]{2}$/;
 
@@ -17,11 +17,11 @@ const EMPTY = {
   postcode: "",
   plaats: "",
   bouwjaar: "",
-  pand_type: "woning",
+  project_type: "woning",
   eigenaar_type: "eigenaar_bewoner",
 };
 
-export default function NieuwPand() {
+export default function NieuwProject() {
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
@@ -34,9 +34,9 @@ export default function NieuwPand() {
       form.bouwjaar !== "" &&
       Number.isInteger(bouwjaar) &&
       bouwjaar >= 2019 &&
-      ["woning", "appartement"].includes(form.pand_type)
+      ["woning", "appartement"].includes(form.project_type)
     );
-  }, [form.bouwjaar, form.pand_type, bouwjaar]);
+  }, [form.bouwjaar, form.project_type, bouwjaar]);
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -66,12 +66,12 @@ export default function NieuwPand() {
 
     setSubmitting(true);
     try {
-      const pand = await createPand({
+      const created = await createProject({
         ...form,
         bouwjaar,
         postcode: form.postcode.trim().toUpperCase().replace(/\s+/g, " "),
       });
-      navigate(`/panden/${pand.id}`, { replace: true });
+      navigate(`/projecten/${created.id}`, { replace: true });
     } catch (err) {
       const detail = err?.response?.data?.detail;
       if (detail?.code === "PLAN_LIMIT_REACHED") {
@@ -82,7 +82,7 @@ export default function NieuwPand() {
           exceeded: true,
         });
       } else {
-        setError(apiErrorMessage(err, "Pand aanmaken mislukt."));
+        setError(apiErrorMessage(err, "Project aanmaken mislukt."));
       }
     } finally {
       setSubmitting(false);
@@ -92,16 +92,16 @@ export default function NieuwPand() {
   return (
     <div className="container-app max-w-3xl py-8 sm:py-10">
       <Link
-        to="/panden"
+        to="/projecten"
         className="text-sm font-semibold text-brand-green hover:underline"
       >
-        ← Terug naar panden
+        ← Terug naar projecten
       </Link>
       <h1 className="mt-3 text-2xl font-extrabold text-gray-900 sm:text-3xl">
-        Nieuw pand toevoegen
+        Nieuw project toevoegen
       </h1>
       <p className="mt-1 text-sm text-gray-600">
-        Vul de basisgegevens van uw pand in. AAA-Lex vult energielabel,
+        Vul de basisgegevens van uw project in. AAA-Lex vult energielabel,
         oppervlakte en notities in na de opname.
       </p>
 
@@ -110,7 +110,7 @@ export default function NieuwPand() {
         className="mt-6 space-y-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
       >
         <section>
-          <h2 className="text-base font-bold text-gray-900">Pandgegevens</h2>
+          <h2 className="text-base font-bold text-gray-900">Projectgegevens</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label="Straat *">
               <input
@@ -160,13 +160,13 @@ export default function NieuwPand() {
                 required
               />
             </Field>
-            <Field label="Type pand *">
+            <Field label="Type project *">
               <select
                 className="input"
-                value={form.pand_type}
-                onChange={(e) => set("pand_type", e.target.value)}
+                value={form.project_type}
+                onChange={(e) => set("project_type", e.target.value)}
               >
-                {PAND_TYPES.map((t) => (
+                {PROJECT_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
                     {t.label}
                   </option>
@@ -218,7 +218,7 @@ export default function NieuwPand() {
         )}
 
         <div className="flex flex-col-reverse gap-2 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
-          <Link to="/panden" className="btn-secondary">
+          <Link to="/projecten" className="btn-secondary">
             Annuleren
           </Link>
           <button
@@ -226,7 +226,7 @@ export default function NieuwPand() {
             className="btn-primary"
             disabled={submitting}
           >
-            {submitting ? "Bezig…" : "Pand opslaan"}
+            {submitting ? "Bezig…" : "Project opslaan"}
           </button>
         </div>
       </form>

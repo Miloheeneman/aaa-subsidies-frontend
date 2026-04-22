@@ -16,14 +16,14 @@ const publicLinks = [
 
 const klantLinks = [
   { to: "/dashboard", label: "Dashboard" },
-  { to: "/panden", label: "Mijn panden" },
+  { to: "/projecten", label: "Mijn projecten" },
   { to: "/aanvraag/nieuw", label: "Nieuwe aanvraag" },
 ];
 
 const adminLinks = [
   { to: "/admin/dashboard", label: "Dashboard" },
   { to: "/admin/aanvragen", label: "Aanvragen" },
-  { to: "/admin/panden", label: "Panden" },
+  { to: "/admin/projecten", label: "Projecten" },
   { to: "/admin/klanten", label: "Klanten" },
   { to: "/admin/regelingen", label: "Regelingen" },
 ];
@@ -66,15 +66,17 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="container-app flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-green font-extrabold text-white">
-              A
-            </span>
-            <span className="text-lg font-bold text-gray-900">
-              AAA-Subsidies
-            </span>
+      <header
+        className="border-b border-white/20"
+        style={{ backgroundColor: "#5a9e1e" }}
+      >
+        <div className="container-app flex min-h-16 items-center justify-between gap-4 py-2">
+          <Link to="/" className="flex shrink-0 items-center">
+            <img
+              src="/aaa-subsidies-logo.svg"
+              alt="AAA-Subsidies"
+              className="h-[52px] w-auto"
+            />
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
             {navLinks.map((l) => (
@@ -83,40 +85,39 @@ export default function Layout() {
                 to={l.to}
                 end={l.end}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition ${
-                    isActive
-                      ? "text-brand-green"
-                      : "text-gray-600 hover:text-brand-green"
-                  }`
+                  [
+                    "text-sm font-medium text-white transition hover:text-white/80",
+                    isActive ? "underline decoration-2 underline-offset-4" : "",
+                  ].join(" ")
                 }
               >
                 {l.label}
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             {authed ? (
               <>
                 {role === "admin" && (
-                  <span className="hidden rounded-full bg-brand-greenLight px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-green sm:inline">
+                  <span className="hidden rounded-full border border-white/35 bg-white/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white sm:inline">
                     Admin
                   </span>
                 )}
                 {role === "installateur" && (
-                  <span className="hidden rounded-full bg-brand-greenLight px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-green sm:inline">
+                  <span className="hidden rounded-full border border-white/35 bg-white/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white sm:inline">
                     Installateur
                   </span>
                 )}
                 <Link
                   to={homeForRole}
-                  className="hidden text-sm font-semibold text-gray-700 hover:text-brand-green sm:inline"
+                  className="hidden text-sm font-semibold text-white transition hover:text-white/80 sm:inline"
                 >
                   Dashboard
                 </Link>
                 <button
                   type="button"
                   onClick={logout}
-                  className="btn-secondary !py-2 !px-4 text-sm"
+                  className="rounded-lg border border-white px-4 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-[#5a9e1e]"
                 >
                   Uitloggen
                 </button>
@@ -125,13 +126,13 @@ export default function Layout() {
               <>
                 <Link
                   to="/login"
-                  className="hidden text-sm font-semibold text-gray-700 hover:text-brand-green sm:inline"
+                  className="hidden text-sm font-semibold text-white transition hover:text-white/80 sm:inline"
                 >
                   Inloggen
                 </Link>
                 <Link
                   to="/subsidiecheck"
-                  className="btn-primary !py-2 !px-4 text-sm"
+                  className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#5a9e1e] transition hover:bg-white/90"
                 >
                   Subsidiecheck
                 </Link>

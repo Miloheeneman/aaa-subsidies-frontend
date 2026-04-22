@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 
 import DeadlineBadge, {
   EnergielabelBadge,
-} from "../../components/panden/DeadlineBadge.jsx";
+} from "../../components/projecten/DeadlineBadge.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
 import {
   eigenaarTypeLabel,
-  listPanden,
-  pandTypeLabel,
-} from "../../lib/panden.js";
+  listProjecten,
+  projectTypeLabel,
+} from "../../lib/projecten.js";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Alle deadlines" },
@@ -19,7 +19,7 @@ const STATUS_OPTIONS = [
   { value: "ok", label: "Op tijd" },
 ];
 
-export default function PandenBeheer() {
+export default function ProjectenBeheer() {
   const [state, setState] = useState({ loading: true });
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -27,7 +27,7 @@ export default function PandenBeheer() {
   async function reload() {
     setState({ loading: true });
     try {
-      const data = await listPanden();
+      const data = await listProjecten();
       setState({ loading: false, data });
     } catch (e) {
       setState({ loading: false, error: apiErrorMessage(e) });
@@ -63,10 +63,10 @@ export default function PandenBeheer() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-            Panden beheer
+            Projecten beheer
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Alle panden van alle klanten, inclusief deadlinestatus en
+            Alle projecten van alle klanten, inclusief deadlinestatus en
             maatregelen.
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function PandenBeheer() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-10 text-center text-gray-500">
-                    Geen panden gevonden voor deze filters.
+                    Geen projecten gevonden voor deze filters.
                   </td>
                 </tr>
               ) : (
@@ -149,7 +149,7 @@ export default function PandenBeheer() {
                         {p.postcode} {p.plaats}
                       </div>
                     </td>
-                    <td className="px-4 py-3">{pandTypeLabel(p.pand_type)}</td>
+                    <td className="px-4 py-3">{projectTypeLabel(p.project_type)}</td>
                     <td className="px-4 py-3">
                       {eigenaarTypeLabel(p.eigenaar_type)}
                     </td>
@@ -165,7 +165,7 @@ export default function PandenBeheer() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        to={`/panden/${p.id}`}
+                        to={`/projecten/${p.id}`}
                         className="text-sm font-semibold text-brand-green hover:underline"
                       >
                         Bekijken →

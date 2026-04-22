@@ -225,7 +225,7 @@ export default function Landing() {
                 {[
                   "Type aanvrager",
                   "Maatregel",
-                  "Pandgegevens",
+                  "Projectgegevens",
                   "Investering",
                   "Resultaat",
                 ].map((label, idx) => (

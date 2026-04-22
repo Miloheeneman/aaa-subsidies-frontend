@@ -4,11 +4,12 @@ export default function AuthShell({ title, subtitle, children, footer }) {
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-brand-greenLight px-4 py-10">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-6 flex items-center justify-center gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-green font-extrabold text-white">
-            A
-          </span>
-          <span className="text-xl font-bold text-gray-900">AAA-Subsidies</span>
+        <Link to="/" className="mb-6 flex justify-center">
+          <img
+            src="/aaa-subsidies-logo.svg"
+            alt="AAA-Subsidies"
+            className="h-[52px] w-auto"
+          />
         </Link>
 
         <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-black/5 sm:p-8">

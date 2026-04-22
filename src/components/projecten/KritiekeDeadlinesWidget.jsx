@@ -6,7 +6,7 @@ import { formatDate, daysUntil } from "../../lib/formatters.js";
 import {
   kritiekeDeadlines,
   maatregelLabel,
-} from "../../lib/panden.js";
+} from "../../lib/projecten.js";
 import DeadlineBadge from "./DeadlineBadge.jsx";
 
 /**
@@ -36,10 +36,10 @@ export default function KritiekeDeadlinesWidget({ maxDagen = 30, limit = 10 }) {
           Kritieke deadlines (≤ {maxDagen} dagen)
         </h3>
         <Link
-          to="/admin/panden"
+          to="/admin/projecten"
           className="text-xs font-semibold text-brand-green hover:underline"
         >
-          Alle panden →
+          Alle projecten →
         </Link>
       </div>
 

@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { RegelingBadge } from "../../components/StatusBadge.jsx";
 import DeadlineBadge, {
   EnergielabelBadge,
-} from "../../components/panden/DeadlineBadge.jsx";
+} from "../../components/projecten/DeadlineBadge.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
 import { getCurrentUser } from "../../lib/auth.js";
 import { formatEuro } from "../../lib/formatters.js";
@@ -12,20 +12,20 @@ import {
   ENERGIELABELS,
   SUBSIDIE_REGELING_BADGE,
   deadlineUitleg,
-  deletePand,
+  deleteProject,
   eigenaarTypeLabel,
-  getPand,
-  getSubsidiesVoorPand,
+  getProject,
+  getSubsidiesVoorProject,
   maatregelLabel,
   maatregelStatusLabel,
-  pandTypeLabel,
-  updatePand,
-} from "../../lib/panden.js";
+  projectTypeLabel,
+  updateProject,
+} from "../../lib/projecten.js";
 import NieuweMaatregelModal from "./NieuweMaatregelModal.jsx";
 
-export default function PandDetail() {
+export default function ProjectDetail() {
   const { id } = useParams();
-  const [pand, setPand] = useState(null);
+  const [project, setProject] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("maatregelen");
@@ -40,13 +40,13 @@ export default function PandDetail() {
     setLoading(true);
     setSubsidiesLoading(true);
     try {
-      // Pand en subsidies parallel ophalen — beide hebben hetzelfde
-      // 403/404-gedrag dus we tonen één foutmelding voor het pand.
-      const [pandData, subsidiesData] = await Promise.all([
-        getPand(id),
-        getSubsidiesVoorPand(id).catch(() => null),
+      // Project en subsidies parallel ophalen — beide hebben hetzelfde
+      // 403/404-gedrag dus we tonen één foutmelding voor het project.
+      const [projectData, subsidiesData] = await Promise.all([
+        getProject(id),
+        getSubsidiesVoorProject(id).catch(() => null),
       ]);
-      setPand(pandData);
+      setProject(projectData);
       setSubsidies(subsidiesData);
       setError(null);
     } catch (e) {
@@ -77,18 +77,18 @@ export default function PandDetail() {
       </div>
     );
   }
-  if (!pand) return null;
+  if (!project) return null;
 
   async function handleDelete() {
     if (
       !confirm(
-        "Weet u zeker dat u dit pand wilt verwijderen? Alle bijbehorende maatregelen en dossiers worden ook verwijderd.",
+        "Weet u zeker dat u dit project wilt verwijderen? Alle bijbehorende maatregelen en dossiers worden ook verwijderd.",
       )
     )
       return;
     try {
-      await deletePand(pand.id);
-      window.location.assign("/panden");
+      await deleteProject(project.id);
+      window.location.assign("/projecten");
     } catch (e) {
       alert(apiErrorMessage(e, "Verwijderen mislukt"));
     }
@@ -97,38 +97,38 @@ export default function PandDetail() {
   return (
     <div className="container-app py-8 sm:py-10">
       <Link
-        to="/panden"
+        to="/projecten"
         className="text-sm font-semibold text-brand-green hover:underline"
       >
-        ← Terug naar panden
+        ← Terug naar projecten
       </Link>
 
       <header className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-            {pand.straat} {pand.huisnummer}
+            {project.straat} {project.huisnummer}
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            {pand.postcode} {pand.plaats}
+            {project.postcode} {project.plaats}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-            <EnergielabelBadge label={pand.energielabel_huidig} />
+            <EnergielabelBadge label={project.energielabel_huidig} />
             <span>
               <span className="text-gray-400">Bouwjaar:</span>{" "}
               <span className="font-semibold text-gray-800">
-                {pand.bouwjaar}
+                {project.bouwjaar}
               </span>
             </span>
             <span>
               <span className="text-gray-400">Type:</span>{" "}
               <span className="font-semibold text-gray-800">
-                {pandTypeLabel(pand.pand_type)}
+                {projectTypeLabel(project.project_type)}
               </span>
             </span>
             <span>
               <span className="text-gray-400">Eigenaar:</span>{" "}
               <span className="font-semibold text-gray-800">
-                {eigenaarTypeLabel(pand.eigenaar_type)}
+                {eigenaarTypeLabel(project.eigenaar_type)}
               </span>
             </span>
           </div>
@@ -146,13 +146,13 @@ export default function PandDetail() {
             onClick={handleDelete}
             className="text-sm font-semibold text-red-700 hover:underline"
           >
-            Verwijder pand
+            Verwijder project
           </button>
         </div>
       </header>
 
       <SubsidieKansen
-        pandId={pand.id}
+        projectId={project.id}
         data={subsidies}
         loading={subsidiesLoading}
       />
@@ -180,14 +180,14 @@ export default function PandDetail() {
       </div>
 
       {tab === "maatregelen" ? (
-        <MaatregelList pand={pand} onAdd={() => setNewModal(true)} />
+        <MaatregelList project={project} onAdd={() => setNewModal(true)} />
       ) : (
-        <AaaLexInfo pand={pand} isAdmin={isAdmin} onSaved={reload} />
+        <AaaLexInfo project={project} isAdmin={isAdmin} onSaved={reload} />
       )}
 
       {newModal && (
         <NieuweMaatregelModal
-          pand={pand}
+          project={project}
           onClose={() => setNewModal(false)}
           onCreated={() => {
             setNewModal(false);
@@ -199,8 +199,8 @@ export default function PandDetail() {
   );
 }
 
-function MaatregelList({ pand, onAdd }) {
-  if (!pand.maatregelen || pand.maatregelen.length === 0) {
+function MaatregelList({ project, onAdd }) {
+  if (!project.maatregelen || project.maatregelen.length === 0) {
     return (
       <div className="mt-6 flex flex-col items-center rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
         <div className="text-4xl">🛠️</div>
@@ -219,7 +219,7 @@ function MaatregelList({ pand, onAdd }) {
   }
   return (
     <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-      {pand.maatregelen.map((m) => (
+      {project.maatregelen.map((m) => (
         <li
           key={m.id}
           className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
@@ -248,7 +248,7 @@ function MaatregelList({ pand, onAdd }) {
 
           <div className="mt-4 flex items-center justify-end">
             <Link
-              to={`/panden/${pand.id}/maatregelen/${m.id}`}
+              to={`/projecten/${project.id}/maatregelen/${m.id}`}
               className="text-sm font-semibold text-brand-green hover:underline"
             >
               Bekijk dossier →
@@ -260,29 +260,29 @@ function MaatregelList({ pand, onAdd }) {
   );
 }
 
-function AaaLexInfo({ pand, isAdmin, onSaved }) {
+function AaaLexInfo({ project, isAdmin, onSaved }) {
   if (isAdmin) {
-    return <AaaLexAdminEditor pand={pand} onSaved={onSaved} />;
+    return <AaaLexAdminEditor project={project} onSaved={onSaved} />;
   }
   return (
     <div className="mt-6 grid gap-4 lg:grid-cols-2">
       <InfoCard title="Energie">
         <Row label="Huidig label">
-          <EnergielabelBadge label={pand.energielabel_huidig} />
+          <EnergielabelBadge label={project.energielabel_huidig} />
         </Row>
         <Row label="Label na maatregelen">
-          <EnergielabelBadge label={pand.energielabel_na_maatregelen} />
+          <EnergielabelBadge label={project.energielabel_na_maatregelen} />
         </Row>
         <Row label="Oppervlakte">
           <span className="font-semibold text-gray-800">
-            {pand.oppervlakte_m2 ? `${pand.oppervlakte_m2} m²` : "—"}
+            {project.oppervlakte_m2 ? `${project.oppervlakte_m2} m²` : "—"}
           </span>
         </Row>
       </InfoCard>
       <InfoCard title="Notities van AAA-Lex">
-        {pand.notities ? (
+        {project.notities ? (
           <p className="whitespace-pre-line text-sm text-gray-700">
-            {pand.notities}
+            {project.notities}
           </p>
         ) : (
           <p className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-3 text-sm italic text-gray-500">
@@ -294,12 +294,12 @@ function AaaLexInfo({ pand, isAdmin, onSaved }) {
   );
 }
 
-function AaaLexAdminEditor({ pand, onSaved }) {
+function AaaLexAdminEditor({ project, onSaved }) {
   const [form, setForm] = useState({
-    energielabel_huidig: pand.energielabel_huidig || "",
-    energielabel_na_maatregelen: pand.energielabel_na_maatregelen || "",
-    oppervlakte_m2: pand.oppervlakte_m2 ?? "",
-    notities: pand.notities || "",
+    energielabel_huidig: project.energielabel_huidig || "",
+    energielabel_na_maatregelen: project.energielabel_na_maatregelen || "",
+    oppervlakte_m2: project.oppervlakte_m2 ?? "",
+    notities: project.notities || "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -314,7 +314,7 @@ function AaaLexAdminEditor({ pand, onSaved }) {
     setError(null);
     setMsg(null);
     try {
-      await updatePand(pand.id, {
+      await updateProject(project.id, {
         energielabel_huidig: form.energielabel_huidig || null,
         energielabel_na_maatregelen: form.energielabel_na_maatregelen || null,
         oppervlakte_m2:
@@ -435,7 +435,7 @@ function AaaLexAdminEditor({ pand, onSaved }) {
 // Subsidiekansen sectie
 // ---------------------------------------------------------------------------
 
-function SubsidieKansen({ pandId, data, loading }) {
+function SubsidieKansen({ projectId, data, loading }) {
   const [showNiet, setShowNiet] = useState(false);
 
   if (loading) {
@@ -461,7 +461,7 @@ function SubsidieKansen({ pandId, data, loading }) {
           Geen passende subsidies gevonden
         </h2>
         <p className="mt-2 text-sm text-amber-900/90">
-          Op basis van de pand gegevens hebben wij geen passende subsidies
+          Op basis van de projectgegevens hebben wij geen passende subsidies
           gevonden. Neem contact op met AAA-Lex voor een persoonlijke
           analyse.
         </p>
@@ -475,17 +475,17 @@ function SubsidieKansen({ pandId, data, loading }) {
         <>
           <header className="rounded-t-2xl border border-b-0 border-brand-green/30 bg-brand-greenLight px-5 py-4">
             <h2 className="text-lg font-extrabold text-brand-greenDark">
-              Dit pand komt in aanmerking voor {eligible.length}{" "}
+              Dit project komt in aanmerking voor {eligible.length}{" "}
               {eligible.length === 1 ? "regeling" : "regelingen"}
             </h2>
             <p className="mt-1 text-sm text-brand-greenDark/80">
-              Subsidiekansen voor dit pand — start een aanvraag wanneer u
+              Subsidiekansen voor dit project — start een aanvraag wanneer u
               er klaar voor bent.
             </p>
           </header>
           <div className="grid gap-4 rounded-b-2xl border border-brand-green/30 bg-white p-5 sm:grid-cols-2">
             {eligible.map((s) => (
-              <SubsidieCard key={s.code} subsidie={s} pandId={pandId} />
+              <SubsidieCard key={s.code} subsidie={s} projectId={projectId} />
             ))}
           </div>
         </>
@@ -495,7 +495,7 @@ function SubsidieKansen({ pandId, data, loading }) {
             Geen passende subsidies gevonden
           </h2>
           <p className="mt-2 text-sm text-amber-900/90">
-            Op basis van de pand gegevens hebben wij geen passende
+            Op basis van de projectgegevens hebben wij geen passende
             subsidies gevonden. Neem contact op met AAA-Lex voor een
             persoonlijke analyse.
           </p>
@@ -511,7 +511,7 @@ function SubsidieKansen({ pandId, data, loading }) {
             className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left text-sm font-semibold text-gray-700 hover:text-brand-green"
           >
             <span>
-              Regelingen waar dit pand niet voor in aanmerking komt
+              Regelingen waar dit project niet voor in aanmerking komt
               <span className="ml-2 inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
                 {nietEligible.length}
               </span>
@@ -550,7 +550,7 @@ function SubsidieKansen({ pandId, data, loading }) {
   );
 }
 
-function SubsidieCard({ subsidie, pandId }) {
+function SubsidieCard({ subsidie, projectId }) {
   const uitleg = deadlineUitleg(
     subsidie.deadline_type,
     subsidie.deadline_maanden,
@@ -590,10 +590,16 @@ function SubsidieCard({ subsidie, pandId }) {
         <Link
           to={
             subsidie.code === "ISDE_WARMTEPOMP"
-              ? `/panden/${pandId}/aanvragen/isde-warmtepomp`
+              ? `/projecten/${projectId}/aanvragen/isde-warmtepomp`
               : subsidie.code === "ISDE_ISOLATIE"
-                ? `/panden/${pandId}/aanvragen/isde-isolatie`
-                : `/panden/${pandId}`
+                ? `/projecten/${projectId}/aanvragen/isde-isolatie`
+                : subsidie.code === "EIA"
+                  ? `/projecten/${projectId}/aanvragen/eia`
+                  : subsidie.code === "MIA_VAMIL"
+                    ? `/projecten/${projectId}/aanvragen/mia-vamil`
+                    : subsidie.code === "DUMAVA"
+                      ? `/projecten/${projectId}/aanvragen/dumava`
+                      : `/projecten/${projectId}`
           }
           className="btn-primary w-full justify-center !py-2 text-sm"
         >

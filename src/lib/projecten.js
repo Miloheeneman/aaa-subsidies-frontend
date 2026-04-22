@@ -4,7 +4,7 @@ import { api } from "./api.js";
 // Constants (mirrored from backend enums; update both sides together)
 // ---------------------------------------------------------------------------
 
-export const PAND_TYPES = [
+export const PROJECT_TYPES = [
   { value: "woning", label: "Woning" },
   { value: "appartement", label: "Appartement" },
   { value: "kantoor", label: "Kantoor" },
@@ -100,8 +100,8 @@ export function maatregelLabel(value) {
   return MAATREGEL_LABELS[value] || value;
 }
 
-export function pandTypeLabel(value) {
-  return PAND_TYPES.find((p) => p.value === value)?.label || value;
+export function projectTypeLabel(value) {
+  return PROJECT_TYPES.find((p) => p.value === value)?.label || value;
 }
 
 export function eigenaarTypeLabel(value) {
@@ -118,53 +118,71 @@ export function maatregelStatusLabel(value) {
 // API wrappers
 // ---------------------------------------------------------------------------
 
-export async function listPanden(params = {}) {
-  const { data } = await api.get("/panden", { params });
+export async function listProjecten(params = {}) {
+  const { data } = await api.get("/projecten", { params });
   return data; // { items, totaal, quota }
 }
 
-export async function getPand(id) {
-  const { data } = await api.get(`/panden/${id}`);
+export async function getProject(id) {
+  const { data } = await api.get(`/projecten/${id}`);
   return data;
 }
 
-export async function createPand(body) {
-  const { data } = await api.post("/panden", body);
+export async function createProject(body) {
+  const { data } = await api.post("/projecten", body);
   return data;
 }
 
-export async function updatePand(id, body) {
-  const { data } = await api.put(`/panden/${id}`, body);
+export async function updateProject(id, body) {
+  const { data } = await api.put(`/projecten/${id}`, body);
   return data;
 }
 
-export async function deletePand(id) {
-  await api.delete(`/panden/${id}`);
+export async function deleteProject(id) {
+  await api.delete(`/projecten/${id}`);
 }
 
-export async function listMaatregelen(pandId) {
-  const { data } = await api.get(`/panden/${pandId}/maatregelen`);
+export async function listMaatregelen(projectId) {
+  const { data } = await api.get(`/projecten/${projectId}/maatregelen`);
   return data;
 }
 
-export async function createMaatregel(pandId, body) {
-  const { data } = await api.post(`/panden/${pandId}/maatregelen`, body);
+export async function createMaatregel(projectId, body) {
+  const { data } = await api.post(`/projecten/${projectId}/maatregelen`, body);
   return data;
 }
 
-export async function submitIsdeWarmtepompAanvraag(pandId, body) {
+export async function submitIsdeWarmtepompAanvraag(projectId, body) {
   const { data } = await api.post(
-    `/panden/${pandId}/aanvragen/isde-warmtepomp`,
+    `/projecten/${projectId}/aanvragen/isde-warmtepomp`,
     body,
   );
   return data;
 }
 
-export async function submitIsdeIsolatieAanvraag(pandId, body) {
+export async function submitIsdeIsolatieAanvraag(projectId, body) {
   const { data } = await api.post(
-    `/panden/${pandId}/aanvragen/isde-isolatie`,
+    `/projecten/${projectId}/aanvragen/isde-isolatie`,
     body,
   );
+  return data;
+}
+
+export async function submitEiaAanvraag(projectId, body) {
+  const { data } = await api.post(`/projecten/${projectId}/aanvragen/eia`, body);
+  return data;
+}
+
+export async function submitMiaVamilAanvraag(projectId, body) {
+  const { data } = await api.post(
+    `/projecten/${projectId}/aanvragen/mia-vamil`,
+    body,
+  );
+  return data;
+}
+
+export async function submitDumavaAanvraag(projectId, body) {
+  const { data } = await api.post(`/projecten/${projectId}/aanvragen/dumava`, body);
   return data;
 }
 
@@ -219,15 +237,15 @@ export async function deleteDocument(maatregelId, documentId) {
 }
 
 export async function kritiekeDeadlines(maxDagen = 30) {
-  const { data } = await api.get("/admin/panden/kritieke-deadlines", {
+  const { data } = await api.get("/admin/projecten/kritieke-deadlines", {
     params: { max_dagen: maxDagen },
   });
   return data;
 }
 
-export async function getSubsidiesVoorPand(pandId) {
-  const { data } = await api.get(`/panden/${pandId}/subsidies`);
-  return data; // { pand_id, eligible: [...], niet_eligible: [...] }
+export async function getSubsidiesVoorProject(projectId) {
+  const { data } = await api.get(`/projecten/${projectId}/subsidies`);
+  return data; // { project_id, eligible: [...], niet_eligible: [...] }
 }
 
 // ---------------------------------------------------------------------------

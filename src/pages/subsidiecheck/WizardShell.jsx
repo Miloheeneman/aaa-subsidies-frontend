@@ -3,7 +3,7 @@ import ProgressBar from "./ProgressBar.jsx";
 const STEP_TITLES = [
   "Wie bent u?",
   "Welke maatregel wilt u nemen?",
-  "Over uw pand",
+  "Over uw project",
   "Over uw investering",
   "Uw subsidiemogelijkheden",
 ];

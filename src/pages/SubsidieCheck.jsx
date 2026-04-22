@@ -11,7 +11,7 @@ import WizardShell from "./subsidiecheck/WizardShell.jsx";
 const EMPTY_STATE = {
   type_aanvrager: null,
   maatregelen: [],
-  pand: {
+  project: {
     postcode: "",
     bouwjaar: "",
     energielabel: "",
@@ -33,10 +33,10 @@ export default function SubsidieCheck() {
     if (step === 1) return Boolean(state.type_aanvrager);
     if (step === 2) return state.maatregelen.length > 0;
     if (step === 3) {
-      const bj = state.pand.bouwjaar;
+      const bj = state.project.bouwjaar;
       const bouwjaarOk =
         bj !== "" && bj !== null && Number.isFinite(Number(bj));
-      return bouwjaarOk && Boolean(state.pand.type_eigenaar);
+      return bouwjaarOk && Boolean(state.project.type_eigenaar);
     }
     if (step === 4) return true;
     return true;
@@ -48,13 +48,13 @@ export default function SubsidieCheck() {
       maatregelen: state.maatregelen,
       offerte_beschikbaar: state.investering.offerte_beschikbaar === true,
     };
-    const pc = state.pand.postcode?.trim();
+    const pc = state.project.postcode?.trim();
     if (pc) body.postcode = pc;
-    if (state.pand.bouwjaar !== "" && state.pand.bouwjaar !== null) {
-      body.bouwjaar = Number(state.pand.bouwjaar);
+    if (state.project.bouwjaar !== "" && state.project.bouwjaar !== null) {
+      body.bouwjaar = Number(state.project.bouwjaar);
     }
-    if (state.pand.energielabel) body.energielabel = state.pand.energielabel;
-    if (state.pand.type_pand) body.type_pand = state.pand.type_pand;
+    if (state.project.energielabel) body.energielabel = state.project.energielabel;
+    if (state.project.type_pand) body.type_pand = state.project.type_pand;
     if (
       state.investering.investering_bedrag !== "" &&
       state.investering.investering_bedrag !== null
@@ -106,8 +106,8 @@ export default function SubsidieCheck() {
       )}
       {step === 3 && (
         <Step3Pand
-          value={state.pand}
-          onChange={(v) => setState((s) => ({ ...s, pand: v }))}
+          value={state.project}
+          onChange={(v) => setState((s) => ({ ...s, project: v }))}
         />
       )}
       {step === 4 && (

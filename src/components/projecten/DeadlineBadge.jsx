@@ -1,4 +1,4 @@
-import { DEADLINE_COLORS, DEADLINE_LABELS } from "../../lib/panden.js";
+import { DEADLINE_COLORS, DEADLINE_LABELS } from "../../lib/projecten.js";
 import { formatDate, daysUntil } from "../../lib/formatters.js";
 
 export default function DeadlineBadge({ status, datum, size = "sm" }) {

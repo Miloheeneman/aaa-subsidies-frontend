@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { RegelingBadge } from "../../components/StatusBadge.jsx";
-import DeadlineBadge from "../../components/panden/DeadlineBadge.jsx";
+import DeadlineBadge from "../../components/projecten/DeadlineBadge.jsx";
 import { apiErrorMessage, uploadToPresignedUrl } from "../../lib/api.js";
 import { getCurrentUser } from "../../lib/auth.js";
 import { formatDate, formatEuro } from "../../lib/formatters.js";
@@ -11,16 +11,16 @@ import {
   deleteDocument,
   getChecklist,
   getMaatregel,
-  getPand,
+  getProject,
   maatregelLabel,
   maatregelStatusLabel,
   requestDocumentUpload,
   verifyDocument,
-} from "../../lib/panden.js";
+} from "../../lib/projecten.js";
 
 export default function MaatregelDossier() {
-  const { pandId, maatregelId } = useParams();
-  const [pand, setPand] = useState(null);
+  const { projectId, maatregelId } = useParams();
+  const [project, setProject] = useState(null);
   const [maatregel, setMaatregel] = useState(null);
   const [checklist, setChecklist] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,11 +34,11 @@ export default function MaatregelDossier() {
     setLoading(true);
     try {
       const [p, m, c] = await Promise.all([
-        getPand(pandId),
+        getProject(projectId),
         getMaatregel(maatregelId),
         getChecklist(maatregelId),
       ]);
-      setPand(p);
+      setProject(p);
       setMaatregel(m);
       setChecklist(c);
       setError(null);
@@ -51,7 +51,7 @@ export default function MaatregelDossier() {
 
   useEffect(() => {
     reload();
-  }, [pandId, maatregelId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projectId, maatregelId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
@@ -60,7 +60,7 @@ export default function MaatregelDossier() {
       </div>
     );
   }
-  if (error || !pand || !maatregel || !checklist) {
+  if (error || !project || !maatregel || !checklist) {
     return (
       <div className="container-app py-10">
         <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
@@ -111,10 +111,10 @@ export default function MaatregelDossier() {
   return (
     <div className="container-app py-8 sm:py-10">
       <Link
-        to={`/panden/${pand.id}`}
+        to={`/projecten/${project.id}`}
         className="text-sm font-semibold text-brand-green hover:underline"
       >
-        ← Terug naar pand
+        ← Terug naar project
       </Link>
 
       <header className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -123,7 +123,7 @@ export default function MaatregelDossier() {
             {maatregelLabel(maatregel.maatregel_type)}
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Dossier voor {pand.straat} {pand.huisnummer}, {pand.plaats}
+            Dossier voor {project.straat} {project.huisnummer}, {project.plaats}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">

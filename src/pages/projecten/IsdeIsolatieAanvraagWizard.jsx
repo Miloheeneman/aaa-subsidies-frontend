@@ -5,10 +5,10 @@ import PageMeta from "../../components/PageMeta.jsx";
 import { apiErrorMessage } from "../../lib/api.js";
 import { formatDate, formatEuro } from "../../lib/formatters.js";
 import {
-  getPand,
+  getProject,
   maatregelLabel,
   submitIsdeIsolatieAanvraag,
-} from "../../lib/panden.js";
+} from "../../lib/projecten.js";
 
 const FEE_PCT = 8;
 
@@ -91,9 +91,9 @@ function emptyDetail() {
 }
 
 export default function IsdeIsolatieAanvraagWizard() {
-  const { pandId } = useParams();
+  const { projectId } = useParams();
   const navigate = useNavigate();
-  const [pand, setPand] = useState(null);
+  const [project, setProject] = useState(null);
   const [loadErr, setLoadErr] = useState(null);
   const [phase, setPhase] = useState(1);
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -110,9 +110,9 @@ export default function IsdeIsolatieAanvraagWizard() {
     let cancelled = false;
     (async () => {
       try {
-        const data = await getPand(pandId);
+        const data = await getProject(projectId);
         if (!cancelled) {
-          setPand(data);
+          setProject(data);
           setLoadErr(null);
         }
       } catch (e) {
@@ -122,10 +122,10 @@ export default function IsdeIsolatieAanvraagWizard() {
     return () => {
       cancelled = true;
     };
-  }, [pandId]);
+  }, [projectId]);
 
-  const adresLabel = pand
-    ? `${pand.straat} ${pand.huisnummer}, ${pand.postcode} ${pand.plaats}`
+  const adresLabel = project
+    ? `${project.straat} ${project.huisnummer}, ${project.postcode} ${project.plaats}`
     : "…";
 
   function toggleType(id) {
@@ -197,7 +197,7 @@ export default function IsdeIsolatieAanvraagWizard() {
     else if (phase === 4) setPhase(3);
     else if (phase === 3) setPhase(2);
     else if (phase === 2) setPhase(1);
-    else navigate(`/panden/${pandId}`);
+    else navigate(`/projecten/${projectId}`);
   }
 
   function validateStep1() {
@@ -261,7 +261,7 @@ export default function IsdeIsolatieAanvraagWizard() {
         installateur_kvk: uitvoerderKvk.trim() || null,
         installatie_of_geplande_datum: geplandeDatum || null,
       };
-      const list = await submitIsdeIsolatieAanvraag(pandId, body);
+      const list = await submitIsdeIsolatieAanvraag(projectId, body);
       setCreated(list);
       setPhase("done");
     } catch (e) {
@@ -278,10 +278,10 @@ export default function IsdeIsolatieAanvraagWizard() {
           {loadErr}
         </div>
         <Link
-          to={`/panden/${pandId}`}
+          to={`/projecten/${projectId}`}
           className="mt-4 inline-block text-sm font-semibold text-brand-green hover:underline"
         >
-          ← Terug naar pand
+          ← Terug naar project
         </Link>
       </div>
     );
@@ -292,12 +292,12 @@ export default function IsdeIsolatieAanvraagWizard() {
       <PageMeta title="ISDE isolatie aanvraag" />
 
       <nav className="text-xs text-gray-500 sm:text-sm">
-        <Link to="/panden" className="font-semibold text-brand-green hover:underline">
-          Mijn panden
+        <Link to="/projecten" className="font-semibold text-brand-green hover:underline">
+          Mijn projecten
         </Link>
         <span className="mx-2 text-gray-300">→</span>
         <Link
-          to={`/panden/${pandId}`}
+          to={`/projecten/${projectId}`}
           className="font-semibold text-brand-green hover:underline"
         >
           {adresLabel}
@@ -378,7 +378,7 @@ export default function IsdeIsolatieAanvraagWizard() {
           />
         )}
         {phase === "done" && created && (
-          <StepDone created={created} pandId={pandId} />
+          <StepDone created={created} projectId={projectId} />
         )}
       </div>
 
@@ -797,7 +797,7 @@ function Step5Confirm({
   );
 }
 
-function StepDone({ created, pandId }) {
+function StepDone({ created, projectId }) {
   const totaalSub = created.reduce(
     (s, m) => s + (m.geschatte_subsidie || 0),
     0,
@@ -849,7 +849,7 @@ function StepDone({ created, pandId }) {
                   : "—"}
               </div>
               <Link
-                to={`/panden/${pandId}/maatregelen/${m.id}`}
+                to={`/projecten/${projectId}/maatregelen/${m.id}`}
                 className="mt-2 inline-block text-xs font-semibold text-brand-green hover:underline"
               >
                 Bekijk dossier →
@@ -871,10 +871,10 @@ function StepDone({ created, pandId }) {
       </p>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Link to="/panden" className="btn-secondary sm:!px-8">
-          Terug naar pand overzicht
+        <Link to="/projecten" className="btn-secondary sm:!px-8">
+          Terug naar projectoverzicht
         </Link>
-        <Link to={`/panden/${pandId}`} className="btn-primary sm:!px-8">
+        <Link to={`/projecten/${projectId}`} className="btn-primary sm:!px-8">
           Nog een maatregel toevoegen
         </Link>
       </div>
