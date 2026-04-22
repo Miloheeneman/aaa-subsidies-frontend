@@ -97,6 +97,24 @@
   .anim-cta-pulse {
     animation: cta-pulse 2s ease-in-out infinite;
   }
+
+  @keyframes wizard-check-pop {
+    0% {
+      transform: scale(0.25);
+      opacity: 0;
+    }
+    65% {
+      transform: scale(1.06);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .wizard-check-pop {
+    animation: wizard-check-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -111,5 +129,10 @@
   .hero-float-c,
   .anim-cta-pulse {
     animation: none !important;
+  }
+  .wizard-check-pop {
+    animation: none !important;
+    transform: scale(1) !important;
+    opacity: 1 !important;
   }
 }

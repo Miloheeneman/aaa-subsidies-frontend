@@ -22,6 +22,7 @@ import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
 import OnboardingPlan from "./pages/onboarding/OnboardingPlan.jsx";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess.jsx";
 import MaatregelDossier from "./pages/panden/MaatregelDossier.jsx";
+import IsdeWarmtepompAanvraagWizard from "./pages/panden/IsdeWarmtepompAanvraagWizard.jsx";
 import NieuwPand from "./pages/panden/NieuwPand.jsx";
 import PandDetail from "./pages/panden/PandDetail.jsx";
 import PandenOverzicht from "./pages/panden/PandenOverzicht.jsx";
@@ -50,6 +51,10 @@ export default function App() {
           <Route path="/panden" element={<PandenOverzicht />} />
           <Route path="/panden/nieuw" element={<NieuwPand />} />
           <Route path="/panden/:id" element={<PandDetail />} />
+          <Route
+            path="/panden/:pandId/aanvragen/isde-warmtepomp"
+            element={<IsdeWarmtepompAanvraagWizard />}
+          />
           <Route
             path="/panden/:pandId/maatregelen/:maatregelId"
             element={<MaatregelDossier />}

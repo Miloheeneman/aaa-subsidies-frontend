@@ -588,7 +588,11 @@ function SubsidieCard({ subsidie, pandId }) {
 
       <div className="mt-auto pt-4">
         <Link
-          to={`/panden/${pandId}/aanvraag/${subsidie.code}`}
+          to={
+            subsidie.code === "ISDE_WARMTEPOMP"
+              ? `/panden/${pandId}/aanvragen/isde-warmtepomp`
+              : `/panden/${pandId}`
+          }
           className="btn-primary w-full justify-center !py-2 text-sm"
         >
           Aanvraag starten →

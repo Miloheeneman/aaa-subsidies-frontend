@@ -152,6 +152,14 @@ export async function createMaatregel(pandId, body) {
   return data;
 }
 
+export async function submitIsdeWarmtepompAanvraag(pandId, body) {
+  const { data } = await api.post(
+    `/panden/${pandId}/aanvragen/isde-warmtepomp`,
+    body,
+  );
+  return data;
+}
+
 export async function getMaatregel(id) {
   const { data } = await api.get(`/maatregelen/${id}`);
   return data;
