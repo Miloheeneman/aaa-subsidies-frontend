@@ -36,10 +36,10 @@ export default function KritiekeDeadlinesWidget({ maxDagen = 30, limit = 10 }) {
           Kritieke deadlines (≤ {maxDagen} dagen)
         </h3>
         <Link
-          to="/admin/projecten"
+          to="/admin/dossiers"
           className="text-xs font-semibold text-brand-green hover:underline"
         >
-          Alle projecten →
+          Alle dossiers →
         </Link>
       </div>
 
@@ -66,14 +66,17 @@ export default function KritiekeDeadlinesWidget({ maxDagen = 30, limit = 10 }) {
                 key={m.id}
                 className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="min-w-0">
+                <Link
+                  to={`/admin/projecten/${m.project_id}/maatregelen/${m.id}`}
+                  className="min-w-0 flex-1 hover:opacity-80"
+                >
                   <div className="truncate font-semibold text-gray-900">
                     {maatregelLabel(m.maatregel_type)}
                   </div>
                   <div className="text-xs text-gray-500">
                     Indienen vóór {formatDate(m.deadline_indienen)}
                   </div>
-                </div>
+                </Link>
                 <div className="flex items-center gap-2">
                   {rood && (
                     <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-red-800">

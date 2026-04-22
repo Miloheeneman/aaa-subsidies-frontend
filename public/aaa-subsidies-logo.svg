@@ -1,32 +1,24 @@
 <svg width="680" height="190" viewBox="0 0 680 190" role="img" xmlns="http://www.w3.org/2000/svg">
   <title>AAA-Subsidies logo</title>
-  <desc>AAA-Subsidies logo finaal met AAA-Lex groene kleur</desc>
+  <desc>AAA-Subsidies logo finaal</desc>
 
   <rect x="0" y="0" width="680" height="190" fill="#5a9e1e" rx="4"/>
 
-  <!-- Bovenlijn -->
-  <line x1="60" y1="28" x2="620" y2="28" stroke="white" stroke-width="4"/>
+  <line x1="60" y1="22" x2="620" y2="22" stroke="white" stroke-width="4"/>
+  <line x1="154" y1="38" x2="350" y2="38" stroke="white" stroke-width="1.5"/>
 
-  <!-- Korte lijn boven AAA vakjes -->
-  <line x1="80" y1="42" x2="278" y2="42" stroke="white" stroke-width="1.5"/>
+  <rect x="154" y="46" width="60" height="60" fill="none" stroke="white" stroke-width="2"/>
+  <text x="184" y="90" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="36" fill="white">A</text>
 
-  <!-- Drie aaneengesloten vakjes AAA -->
-  <rect x="80" y="50" width="66" height="66" fill="none" stroke="white" stroke-width="2"/>
-  <rect x="146" y="50" width="66" height="66" fill="none" stroke="white" stroke-width="2"/>
-  <rect x="212" y="50" width="66" height="66" fill="none" stroke="white" stroke-width="2"/>
+  <rect x="222" y="46" width="60" height="60" fill="none" stroke="white" stroke-width="2"/>
+  <text x="252" y="90" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="36" fill="white">A</text>
 
-  <!-- A letters -->
-  <text x="113" y="98" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="40" fill="white">A</text>
-  <text x="179" y="98" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="40" fill="white">A</text>
-  <text x="245" y="98" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="40" fill="white">A</text>
+  <rect x="290" y="46" width="60" height="60" fill="none" stroke="white" stroke-width="2"/>
+  <text x="320" y="90" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="36" fill="white">A</text>
 
-  <!-- Witte box om SUBSIDIES met groene tekst -->
-  <rect x="296" y="50" width="200" height="66" fill="white" stroke="white" stroke-width="2"/>
-  <text x="396" y="95" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="30" fill="#5a9e1e" letter-spacing="2">SUBSIDIES</text>
+  <rect x="366" y="46" width="210" height="60" fill="white" stroke="white" stroke-width="2"/>
+  <text x="471" y="87" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="28" fill="#5a9e1e" letter-spacing="2">SUBSIDIES</text>
 
-  <!-- Onderlijn boven tagline -->
-  <line x1="60" y1="130" x2="620" y2="130" stroke="white" stroke-width="4"/>
-
-  <!-- Tagline -->
-  <text x="340" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="white" letter-spacing="3">SUSTAINABLE SUBSIDIES &amp; ENGINEERS</text>
+  <line x1="60" y1="120" x2="620" y2="120" stroke="white" stroke-width="4"/>
+  <text x="340" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="white" letter-spacing="3">SUSTAINABLE SUBSIDIES &amp; ENGINEERS</text>
 </svg>

@@ -155,33 +155,76 @@ export default function ProjectDetail() {
         projectId={project.id}
         data={subsidies}
         loading={subsidiesLoading}
+        hideIneligible={!isAdmin}
       />
 
-      <div className="mt-8 border-b border-gray-200">
-        <nav className="-mb-px flex gap-6 text-sm font-semibold">
-          {[
-            ["maatregelen", "Maatregelen"],
-            ["aaa-lex", "AAA-Lex informatie"],
-          ].map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setTab(value)}
-              className={`border-b-2 pb-3 ${
-                tab === value
-                  ? "border-brand-green text-brand-green"
-                  : "border-transparent text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      {!isAdmin &&
+        project.heeft_open_upload_verzoek &&
+        (project.open_upload_verzoeken || []).length > 0 && (
+          <section className="mt-6 rounded-xl border-2 border-amber-300 bg-amber-50 p-5 shadow-sm">
+            <h2 className="text-base font-extrabold text-amber-950">
+              AAA-Lex heeft documenten nodig
+            </h2>
+            <p className="mt-2 text-sm text-amber-950/90">
+              Wij hebben{" "}
+              <strong>
+                {(project.open_upload_verzoeken || []).reduce(
+                  (s, v) => s + (v.documenten_nog_nodig || 0),
+                  0,
+                )}
+              </strong>{" "}
+              document(en) van u nodig om uw aanvraag te kunnen indienen.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {(project.open_upload_verzoeken || []).map((v) => (
+                <Link
+                  key={v.id}
+                  to={`/projecten/${project.id}/documenten/upload/${v.token}`}
+                  className="btn-primary !py-2 !px-4 text-sm"
+                >
+                  Documenten uploaden
+                  {(project.open_upload_verzoeken || []).length > 1
+                    ? ` (${v.documenten_nog_nodig} open)`
+                    : ""}{" "}
+                  →
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
-      {tab === "maatregelen" ? (
-        <MaatregelList project={project} onAdd={() => setNewModal(true)} />
-      ) : (
+      {isAdmin && (
+        <div className="mt-8 border-b border-gray-200">
+          <nav className="-mb-px flex gap-6 text-sm font-semibold">
+            {[
+              ["maatregelen", "Maatregelen"],
+              ["aaa-lex", "AAA-Lex informatie"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setTab(value)}
+                className={`border-b-2 pb-3 ${
+                  tab === value
+                    ? "border-brand-green text-brand-green"
+                    : "border-transparent text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {(!isAdmin || tab === "maatregelen") && (
+        <MaatregelList
+          project={project}
+          onAdd={() => setNewModal(true)}
+          clientView={!isAdmin}
+        />
+      )}
+      {isAdmin && tab === "aaa-lex" && (
         <AaaLexInfo project={project} isAdmin={isAdmin} onSaved={reload} />
       )}
 
@@ -199,7 +242,7 @@ export default function ProjectDetail() {
   );
 }
 
-function MaatregelList({ project, onAdd }) {
+function MaatregelList({ project, onAdd, clientView = false }) {
   if (!project.maatregelen || project.maatregelen.length === 0) {
     return (
       <div className="mt-6 flex flex-col items-center rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
@@ -236,7 +279,12 @@ function MaatregelList({ project, onAdd }) {
                 {m.regeling_code && <RegelingBadge code={m.regeling_code} />}
               </div>
             </div>
-            <DeadlineBadge status={m.deadline_status} datum={m.deadline_indienen} />
+            {!clientView && (
+              <DeadlineBadge
+                status={m.deadline_status}
+                datum={m.deadline_indienen}
+              />
+            )}
           </div>
 
           <dl className="mt-4 grid grid-cols-2 gap-y-1 text-xs text-gray-600">
@@ -251,7 +299,7 @@ function MaatregelList({ project, onAdd }) {
               to={`/projecten/${project.id}/maatregelen/${m.id}`}
               className="text-sm font-semibold text-brand-green hover:underline"
             >
-              Bekijk dossier →
+              {clientView ? "Bekijk aanvraag →" : "Bekijk dossier →"}
             </Link>
           </div>
         </li>
@@ -435,7 +483,7 @@ function AaaLexAdminEditor({ project, onSaved }) {
 // Subsidiekansen sectie
 // ---------------------------------------------------------------------------
 
-function SubsidieKansen({ projectId, data, loading }) {
+function SubsidieKansen({ projectId, data, loading, hideIneligible = false }) {
   const [showNiet, setShowNiet] = useState(false);
 
   if (loading) {
@@ -502,7 +550,7 @@ function SubsidieKansen({ projectId, data, loading }) {
         </div>
       )}
 
-      {nietEligible.length > 0 && (
+      {!hideIneligible && nietEligible.length > 0 && (
         <div className="mt-4 rounded-2xl border border-gray-200 bg-white">
           <button
             type="button"

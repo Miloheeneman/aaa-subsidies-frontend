@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import PageMeta from "../../components/PageMeta.jsx";
 import { api, apiErrorMessage } from "../../lib/api.js";
-import { setToken } from "../../lib/auth.js";
+import { decodeJwtPayload, setToken } from "../../lib/auth.js";
 import AuthShell, {
   Field,
   FormError,
@@ -39,7 +39,15 @@ export default function Login() {
     try {
       const { data } = await api.post("/auth/login", form);
       setToken(data.access_token);
-      navigate(next, { replace: true });
+      const payload = decodeJwtPayload(data.access_token);
+      let dest = next;
+      if (
+        payload?.role === "admin" &&
+        (dest === "/dashboard" || dest.startsWith("/dashboard"))
+      ) {
+        dest = "/admin";
+      }
+      navigate(dest, { replace: true });
     } catch (err) {
       const msg = apiErrorMessage(err);
       if (err?.response?.status === 403 && /geverif/i.test(msg)) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 
+import NotificationBell from "./NotificationBell.jsx";
 import {
   getCurrentUser,
   isLoggedIn,
@@ -18,14 +19,6 @@ const klantLinks = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/projecten", label: "Mijn projecten" },
   { to: "/aanvraag/nieuw", label: "Nieuwe aanvraag" },
-];
-
-const adminLinks = [
-  { to: "/admin/dashboard", label: "Dashboard" },
-  { to: "/admin/aanvragen", label: "Aanvragen" },
-  { to: "/admin/projecten", label: "Projecten" },
-  { to: "/admin/klanten", label: "Klanten" },
-  { to: "/admin/regelingen", label: "Regelingen" },
 ];
 
 const installateurLinks = [
@@ -50,12 +43,16 @@ export default function Layout() {
 
   let navLinks = publicLinks;
   if (authed) {
-    if (role === "admin") navLinks = adminLinks;
-    else if (role === "installateur") navLinks = installateurLinks;
+    if (role === "admin") {
+      navLinks = [
+        ...publicLinks,
+        { to: "/admin", label: "Admin-portaal" },
+      ];
+    } else if (role === "installateur") navLinks = installateurLinks;
     else navLinks = klantLinks;
   }
   let homeForRole = "/dashboard";
-  if (role === "admin") homeForRole = "/admin/dashboard";
+  if (role === "admin") homeForRole = "/admin";
   else if (role === "installateur") homeForRole = "/installateur/dashboard";
 
   function logout() {
@@ -95,6 +92,7 @@ export default function Layout() {
           <div className="flex items-center gap-2 sm:gap-3">
             {authed ? (
               <>
+                {role === "klant" && <NotificationBell />}
                 {role === "admin" && (
                   <span className="hidden rounded-full border border-white/35 bg-white/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white sm:inline">
                     Admin

@@ -1,5 +1,6 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
+import AdminLayout from "./components/AdminLayout.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import InstallateurRoute from "./components/InstallateurRoute.jsx";
 import Layout from "./components/Layout.jsx";
@@ -23,6 +24,7 @@ import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
 import OnboardingPlan from "./pages/onboarding/OnboardingPlan.jsx";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess.jsx";
 import MaatregelDossier from "./pages/projecten/MaatregelDossier.jsx";
+import PublicDocumentUpload from "./pages/projecten/PublicDocumentUpload.jsx";
 import EiaAanvraagWizard from "./pages/projecten/EiaAanvraagWizard.jsx";
 import MiaVamilAanvraagWizard from "./pages/projecten/MiaVamilAanvraagWizard.jsx";
 import DumavaAanvraagWizard from "./pages/projecten/DumavaAanvraagWizard.jsx";
@@ -32,6 +34,9 @@ import NieuwProject from "./pages/projecten/NieuwProject.jsx";
 import ProjectDetail from "./pages/projecten/ProjectDetail.jsx";
 import ProjectenOverzicht from "./pages/projecten/ProjectenOverzicht.jsx";
 import AdminProjectenBeheer from "./pages/admin/ProjectenBeheer.jsx";
+import AdminDossiersBeheer from "./pages/admin/DossiersBeheer.jsx";
+import AdminKlantDetail from "./pages/admin/KlantDetail.jsx";
+import AdminMaatregelDossier from "./pages/admin/AdminMaatregelDossier.jsx";
 import Abonnement from "./pages/installateur/Abonnement.jsx";
 import DossierDetail from "./pages/installateur/DossierDetail.jsx";
 import DossiersOverzicht from "./pages/installateur/DossiersOverzicht.jsx";
@@ -49,6 +54,10 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route
+          path="/projecten/:projectId/documenten/upload/:token"
+          element={<PublicDocumentUpload />}
+        />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -85,21 +94,6 @@ export default function App() {
           <Route path="/onboarding/success" element={<OnboardingSuccess />} />
         </Route>
 
-        <Route element={<AdminRoute />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/aanvragen" element={<AdminAanvraagBeheer />} />
-          <Route
-            path="/admin/aanvraag/:id"
-            element={<AdminAanvraagDetail />}
-          />
-          <Route path="/admin/klanten" element={<AdminKlantenBeheer />} />
-          <Route path="/admin/projecten" element={<AdminProjectenBeheer />} />
-          <Route
-            path="/admin/regelingen"
-            element={<AdminRegelingenBeheer />}
-          />
-        </Route>
-
         <Route element={<InstallateurRoute />}>
           <Route
             path="/installateur/dashboard"
@@ -118,6 +112,28 @@ export default function App() {
         </Route>
 
         <Route path="*" element={<NotFound />} />
+      </Route>
+
+      <Route element={<AdminRoute />}>
+        <Route path="admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route
+            path="dashboard"
+            element={<Navigate to="/admin" replace />}
+          />
+          <Route path="aanvragen" element={<AdminAanvraagBeheer />} />
+          <Route path="aanvraag/:id" element={<AdminAanvraagDetail />} />
+          <Route path="klanten" element={<AdminKlantenBeheer />} />
+          <Route path="klanten/:id" element={<AdminKlantDetail />} />
+          <Route path="projecten" element={<AdminProjectenBeheer />} />
+          <Route path="dossiers" element={<AdminDossiersBeheer />} />
+          <Route path="regelingen" element={<AdminRegelingenBeheer />} />
+          <Route
+            path="projecten/:projectId/maatregelen/:maatregelId"
+            element={<AdminMaatregelDossier />}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Route>
       </Route>
     </Routes>
   );

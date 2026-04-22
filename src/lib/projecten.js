@@ -30,6 +30,7 @@ export const MAATREGEL_STATUSSEN = [
   { value: "gepland", label: "Gepland" },
   { value: "uitgevoerd", label: "Uitgevoerd" },
   { value: "aangevraagd", label: "Aangevraagd" },
+  { value: "in_beoordeling", label: "In beoordeling (RVO)" },
   { value: "goedgekeurd", label: "Goedgekeurd" },
   { value: "afgewezen", label: "Afgewezen" },
 ];
@@ -234,6 +235,42 @@ export async function verifyDocument(maatregelId, documentId) {
 
 export async function deleteDocument(maatregelId, documentId) {
   await api.delete(`/maatregelen/${maatregelId}/documenten/${documentId}`);
+}
+
+/** Publieke uploadflow (token uit e-mail, geen login). */
+export async function getPublicUploadMeta(projectId, token) {
+  const { data } = await api.get(
+    `/projecten/${projectId}/documenten/upload/${token}`,
+  );
+  return data;
+}
+
+export async function publicUploadPresign(projectId, token, body) {
+  const { data } = await api.post(
+    `/projecten/${projectId}/documenten/upload/${token}/presign`,
+    body,
+  );
+  return data;
+}
+
+export async function publicUploadConfirm(projectId, token, documentId) {
+  const { data } = await api.post(
+    `/projecten/${projectId}/documenten/upload/${token}/confirm/${documentId}`,
+  );
+  return data;
+}
+
+export async function listNotifications() {
+  const { data } = await api.get("/notifications");
+  return data;
+}
+
+export async function markNotificationRead(id) {
+  await api.post(`/notifications/${id}/read`);
+}
+
+export async function markAllNotificationsRead() {
+  await api.post("/notifications/read-all");
 }
 
 export async function kritiekeDeadlines(maxDagen = 30) {

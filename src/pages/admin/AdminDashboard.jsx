@@ -44,6 +44,9 @@ function Kpi({ label, value, accent = "text-gray-900", hint }) {
 
 export default function AdminDashboard() {
   const [dash, setDash] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [actions, setActions] = useState([]);
+  const [activity, setActivity] = useState([]);
   const [recent, setRecent] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,11 +56,17 @@ export default function AdminDashboard() {
     async function load() {
       setLoading(true);
       try {
-        const [dashRes, listRes] = await Promise.all([
+        const [statsRes, actRes, actvRes, dashRes, listRes] = await Promise.all([
+          api.get("/admin/stats"),
+          api.get("/admin/portal/action-items"),
+          api.get("/admin/portal/recent-activity"),
           api.get("/admin/dashboard"),
           api.get("/admin/aanvragen", { params: { page: 1, per_page: 10 } }),
         ]);
         if (cancel) return;
+        setStats(statsRes.data);
+        setActions(actRes.data ?? []);
+        setActivity(actvRes.data ?? []);
         setDash(dashRes.data);
         setRecent(listRes.data.items ?? []);
       } catch (err) {
@@ -87,15 +96,18 @@ export default function AdminDashboard() {
             Admin dashboard
           </h1>
           <p className="text-sm text-gray-600">
-            Realtime overzicht van alle subsidieaanvragen, fees en deadlines.
+            KPI&apos;s, dossiers die actie vragen, en klassieke aanvragen.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link to="/admin/aanvragen" className="btn-secondary !py-2 !px-4 text-sm">
-            Alle aanvragen
+            Aanvragen
           </Link>
           <Link to="/admin/projecten" className="btn-secondary !py-2 !px-4 text-sm">
             Projecten
+          </Link>
+          <Link to="/admin/dossiers" className="btn-secondary !py-2 !px-4 text-sm">
+            Dossiers
           </Link>
           <Link to="/admin/klanten" className="btn-primary !py-2 !px-4 text-sm">
             Klanten
@@ -109,14 +121,115 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {loading || !dash ? (
+      {loading || !dash || !stats ? (
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
           Laden…
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Kpi label="Totaal aanvragen" value={dash.totaal_aanvragen} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Kpi label="Actieve klanten" value={stats.totaal_klanten} />
+            <Kpi
+              label="Projecten deze maand"
+              value={stats.projecten_deze_maand}
+            />
+            <Kpi
+              label="Openstaande dossiers"
+              value={stats.openstaande_dossiers}
+              accent={
+                stats.openstaande_dossiers > 0 ? "text-amber-700" : "text-gray-900"
+              }
+            />
+            <Kpi
+              label="Ingediend bij RVO (deze maand)"
+              value={stats.ingediend_deze_maand}
+            />
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-xl border border-red-200 bg-red-50/40 p-5">
+              <h2 className="text-lg font-bold text-gray-900">Vereist actie</h2>
+              <p className="text-xs text-gray-600">
+                Rood: deadline binnen 14 dagen. Oranje: nieuwe intake (oriëntatie,
+                laatste 14 dagen).
+              </p>
+              <ul className="mt-4 space-y-3">
+                {actions.length === 0 ? (
+                  <li className="text-sm text-gray-500">Geen urgente items.</li>
+                ) : (
+                  actions.slice(0, 12).map((a) => (
+                    <li
+                      key={`${a.urgency}-${a.maatregel_id}`}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/60 bg-white p-3 text-sm shadow-sm"
+                    >
+                      <div>
+                        <span
+                          className={
+                            a.urgency === "kritiek"
+                              ? "font-bold text-red-700"
+                              : "font-semibold text-amber-800"
+                          }
+                        >
+                          {a.urgency === "kritiek" ? "●" : "●"}{" "}
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {a.organisation_name}
+                        </span>
+                        <div className="flex flex-wrap items-center gap-x-2 text-xs text-gray-600">
+                          <span>{a.project_adres}</span>
+                          {a.regeling && <RegelingBadge code={a.regeling} />}
+                        </div>
+                        {a.deadline_indienen && (
+                          <div className="text-xs text-gray-500">
+                            Deadline {formatDate(a.deadline_indienen)} (
+                            {daysUntil(a.deadline_indienen) ?? "—"} dgn)
+                          </div>
+                        )}
+                      </div>
+                      <Link
+                        to={a.link}
+                        className="shrink-0 text-sm font-bold text-brand-green hover:underline"
+                      >
+                        Bekijk →
+                      </Link>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-white p-5">
+              <h2 className="text-lg font-bold text-gray-900">Recente activiteit</h2>
+              <ul className="mt-3 space-y-2 text-sm">
+                {activity.length === 0 ? (
+                  <li className="text-gray-500">Nog geen activiteit.</li>
+                ) : (
+                  activity.map((ev, i) => (
+                    <li key={i} className="border-b border-gray-100 pb-2 text-gray-700">
+                      <span className="text-xs text-gray-400">
+                        {formatDate(ev.at)}
+                      </span>
+                      <div>
+                        {ev.link ? (
+                          <Link
+                            to={ev.link}
+                            className="font-medium text-brand-green hover:underline"
+                          >
+                            {ev.message}
+                          </Link>
+                        ) : (
+                          ev.message
+                        )}
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Kpi label="Totaal aanvragen (klassiek)" value={dash.totaal_aanvragen} />
             <Kpi label="Deze maand" value={dash.aanvragen_deze_maand} />
             <Kpi
               label="Geschatte subsidie"
@@ -204,7 +317,7 @@ export default function AdminDashboard() {
           <div className="mt-8 overflow-hidden rounded-xl border border-gray-200 bg-white">
             <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3">
               <div className="text-sm font-semibold text-gray-700">
-                Recente aanvragen
+                Recente aanvragen (klassiek)
               </div>
               <Link
                 to="/admin/aanvragen"
@@ -256,7 +369,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 text-right">
                             {formatEuro(
-                              a.toegekende_subsidie ?? a.geschatte_subsidie
+                              a.toegekende_subsidie ?? a.geschatte_subsidie,
                             )}
                           </td>
                           <td className="px-4 py-3 text-xs">
@@ -301,7 +414,8 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-2 text-right text-xs text-gray-400">
-            {regelingLabel("ISDE")} · {regelingLabel("EIA")} · {regelingLabel("MIA")} · {regelingLabel("VAMIL")} · {regelingLabel("DUMAVA")}
+            {regelingLabel("ISDE")} · {regelingLabel("EIA")} · {regelingLabel("MIA")} ·{" "}
+            {regelingLabel("VAMIL")} · {regelingLabel("DUMAVA")}
           </div>
         </>
       )}

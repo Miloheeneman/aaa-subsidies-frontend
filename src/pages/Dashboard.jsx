@@ -1,19 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import StatusBadge, { RegelingBadge } from "../components/StatusBadge.jsx";
-import DeadlineBadge, {
-  EnergielabelBadge,
-} from "../components/projecten/DeadlineBadge.jsx";
 import { api, apiErrorMessage } from "../lib/api.js";
 import { setCachedMe } from "../lib/auth.js";
 import {
   formatDate,
   formatEuro,
-  daysUntil,
-  maatregelLabel,
 } from "../lib/formatters.js";
-import { listProjecten, projectTypeLabel } from "../lib/projecten.js";
+import {
+  listNotifications,
+  listProjecten,
+} from "../lib/projecten.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -37,8 +34,8 @@ function PlanBadge({ plan, status }) {
   const tone = pending
     ? "bg-amber-50 text-amber-800 border-amber-200"
     : cancelled
-    ? "bg-gray-100 text-gray-700 border-gray-200"
-    : "bg-brand-greenLight text-brand-greenDark border-brand-green/30";
+      ? "bg-gray-100 text-gray-700 border-gray-200"
+      : "bg-brand-greenLight text-brand-greenDark border-brand-green/30";
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${tone}`}
@@ -67,33 +64,69 @@ function Kpi({ label, value, sublabel }) {
   );
 }
 
-function DeadlineCell({ datum }) {
-  if (!datum) return <span className="text-gray-400">—</span>;
-  const days = daysUntil(datum);
-  const label = formatDate(datum);
-  if (days === null) return label;
-  if (days < 0) {
-    return (
-      <span className="text-red-700">
-        {label} <span className="text-xs">(verlopen)</span>
-      </span>
-    );
-  }
-  if (days <= 14) {
-    return (
-      <span className="text-amber-700">
-        {label} <span className="text-xs">(nog {days} dagen)</span>
-      </span>
-    );
-  }
-  return <span>{label}</span>;
+function OnboardingEmpty({ firstName }) {
+  return (
+    <section className="mt-8 overflow-hidden rounded-2xl border border-brand-green/25 bg-gradient-to-br from-brand-greenLight to-white shadow-sm">
+      <div className="border-b border-brand-green/20 bg-white/80 px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-brand-greenDark">
+        Stap 1 van 3
+      </div>
+      <div className="px-6 py-10 text-center sm:px-10">
+        <h2 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
+          Welkom bij AAA-Subsidies
+          {firstName ? `, ${firstName}` : ""}
+        </h2>
+        <p className="mx-auto mt-2 max-w-lg text-sm text-gray-600">
+          In 3 stappen starten wij uw subsidietraject — rustig, overzichtelijk en
+          met AAA-Lex naast u.
+        </p>
+        <ol className="mx-auto mt-8 max-w-md space-y-4 text-left text-sm">
+          <li className="flex gap-3">
+            <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand-green text-xs font-extrabold text-white">
+              ✓
+            </span>
+            <div>
+              <div className="font-bold text-gray-900">Account aangemaakt</div>
+              <div className="text-gray-600">U bent ingelogd en klaar om te starten.</div>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border-2 border-brand-green bg-white text-xs font-extrabold text-brand-green">
+              →
+            </span>
+            <div>
+              <div className="font-bold text-gray-900">Project registreren</div>
+              <div className="text-gray-600">
+                Voeg uw eerste project toe zodat wij kunnen berekenen welke
+                subsidies van toepassing zijn.
+              </div>
+              <Link to="/projecten/nieuw" className="btn-primary mt-3 inline-flex">
+                Project toevoegen
+              </Link>
+            </div>
+          </li>
+          <li className="flex gap-3 opacity-70">
+            <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-gray-300 bg-gray-50 text-xs font-bold text-gray-400">
+              ○
+            </span>
+            <div>
+              <div className="font-bold text-gray-900">Aanvraag starten</div>
+              <div className="text-gray-600">
+                Kies een maatregel en doorloop de wizard — AAA-Lex begeleidt het
+                dossier verder.
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+  );
 }
 
 export default function Dashboard() {
   const [me, setMe] = useState(null);
-  const [aanvragen, setAanvragen] = useState([]);
   const [projecten, setProjecten] = useState([]);
   const [projectenQuota, setProjectenQuota] = useState(null);
+  const [notifs, setNotifs] = useState({ items: [], unread_count: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -101,16 +134,16 @@ export default function Dashboard() {
     let cancelled = false;
     Promise.all([
       api.get("/auth/me"),
-      api.get("/aanvragen"),
       listProjecten().catch(() => ({ items: [], quota: null })),
+      listNotifications().catch(() => ({ items: [], unread_count: 0 })),
     ])
-      .then(([meRes, aanRes, projectRes]) => {
+      .then(([meRes, projectRes, notifRes]) => {
         if (cancelled) return;
         setMe(meRes.data);
         setCachedMe(meRes.data);
-        setAanvragen(aanRes.data ?? []);
         setProjecten(projectRes.items ?? []);
         setProjectenQuota(projectRes.quota ?? null);
+        setNotifs(notifRes);
         setLoading(false);
       })
       .catch((err) => {
@@ -124,25 +157,42 @@ export default function Dashboard() {
   }, []);
 
   const kpis = useMemo(() => {
-    const active = aanvragen.filter(
-      (a) => a.status !== "goedgekeurd" && a.status !== "afgewezen",
-    ).length;
-    const geschat = aanvragen.reduce(
-      (sum, a) => sum + Number(a.geschatte_subsidie ?? 0),
+    const active = projecten.length;
+    const geschat = projecten.reduce(
+      (sum, p) => sum + Number(p.totaal_geschatte_subsidie ?? 0),
       0,
     );
-    const missing = aanvragen.reduce(
-      (sum, a) => sum + Number(a.missing_document_count ?? 0),
-      0,
-    );
-    const toegekend = aanvragen.reduce(
-      (sum, a) => sum + Number(a.toegekende_subsidie ?? 0),
-      0,
-    );
-    return { active, geschat, missing, toegekend };
-  }, [aanvragen]);
+    const uploads = projecten.filter((p) => p.heeft_open_upload_verzoek).length;
+    const openActions =
+      uploads + (notifs.items || []).filter((n) => !n.read_at).length;
+    return { active, geschat, openActions };
+  }, [projecten, notifs.items]);
 
-  const recent = useMemo(() => aanvragen.slice(0, 10), [aanvragen]);
+  const activity = useMemo(() => {
+    const rows = [];
+    for (const n of notifs.items || []) {
+      rows.push({
+        key: `n-${n.id}`,
+        label: n.title,
+        sub: n.body,
+        at: n.created_at,
+        href: `/projecten/${n.project_id}`,
+      });
+    }
+    for (const p of projecten.slice(0, 5)) {
+      rows.push({
+        key: `p-${p.id}`,
+        label: `Project: ${p.straat} ${p.huisnummer}, ${p.plaats}`,
+        sub: p.heeft_open_upload_verzoek
+          ? "Actie: documenten uploaden"
+          : `${p.aantal_maatregelen || 0} maatregel(len)`,
+        at: p.updated_at || p.created_at,
+        href: `/projecten/${p.id}`,
+      });
+    }
+    rows.sort((a, b) => new Date(b.at) - new Date(a.at));
+    return rows.slice(0, 12);
+  }, [notifs.items, projecten]);
 
   if (loading) {
     return (
@@ -165,6 +215,8 @@ export default function Dashboard() {
   const firstName = me?.user?.first_name || "";
   const plan = me?.user?.subscription_plan || "gratis";
   const subStatus = me?.user?.subscription_status || "active";
+  const isKlant = me?.user?.role === "klant";
+  const noProjects = isKlant && projecten.length === 0;
 
   return (
     <div className="container-app py-8 sm:py-10">
@@ -183,8 +235,8 @@ export default function Dashboard() {
           <Link to="/subsidiecheck" className="btn-secondary">
             Doe subsidiecheck
           </Link>
-          <Link to="/aanvraag/nieuw" className="btn-primary">
-            Nieuwe aanvraag
+          <Link to="/projecten/nieuw" className="btn-primary">
+            Project toevoegen
           </Link>
         </div>
       </div>
@@ -204,188 +256,141 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi
-          label="Actieve aanvragen"
-          value={kpis.active}
-          sublabel={`van ${aanvragen.length} totaal`}
-        />
-        <Kpi
-          label="Totaal geschatte subsidie"
-          value={formatEuro(kpis.geschat)}
-        />
-        <Kpi
-          label="Documenten te uploaden"
-          value={kpis.missing}
-          sublabel={
-            kpis.missing > 0 ? "U moet nog documenten aanleveren" : "Alles geüpload"
-          }
-        />
-        <Kpi label="Toegekende subsidie" value={formatEuro(kpis.toegekend)} />
-      </div>
-
-      <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-100 p-5">
-          <h2 className="text-lg font-bold text-gray-900">Mijn projecten</h2>
-          <div className="flex items-center gap-3 text-sm">
-            {projectenQuota && (
-              <span className="hidden text-xs text-gray-500 sm:inline">
-                {projectenQuota.used}
-                {projectenQuota.limit !== null && ` / ${projectenQuota.limit}`} projecten
-              </span>
-            )}
-            <Link
-              to="/projecten/nieuw"
-              className="font-semibold text-brand-green hover:underline"
-            >
-              + Project toevoegen
-            </Link>
-            <Link
-              to="/projecten"
-              className="font-semibold text-brand-green hover:underline"
-            >
-              Alles →
-            </Link>
-          </div>
+      {noProjects ? (
+        <OnboardingEmpty firstName={firstName} />
+      ) : (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Kpi label="Actieve projecten" value={kpis.active} />
+          <Kpi
+            label="Totaal geschatte subsidie"
+            value={formatEuro(kpis.geschat)}
+            sublabel="Som van alle maatregelen op uw projecten"
+          />
+          <Kpi
+            label="Openstaande acties"
+            value={kpis.openActions}
+            sublabel="Meldingen + openstaande document-uploads"
+          />
         </div>
+      )}
 
-        {projectenQuota &&
-          projectenQuota.limit !== null &&
-          projectenQuota.remaining !== null &&
-          projectenQuota.remaining <= 1 &&
-          !projectenQuota.exceeded && (
-            <div className="border-b border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-900">
-              U heeft nog{" "}
-              <strong>
-                {projectenQuota.remaining}{" "}
-                {projectenQuota.remaining === 1 ? "project" : "projecten"}
-              </strong>{" "}
-              over in uw huidige plan.{" "}
-              <Link
-                to="/onboarding/plan"
-                className="font-semibold underline hover:text-amber-950"
-              >
-                Upgrade voor meer projecten →
-              </Link>
-            </div>
-          )}
-        {projecten.length === 0 ? (
-          <div className="grid place-items-center gap-4 px-5 py-10 text-center">
-            <div className="text-5xl" aria-hidden>
-              🏠
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">
-                U heeft nog geen projecten
-              </h3>
-              <p className="mt-1 max-w-md text-sm text-gray-600">
-                Voeg uw eerste project toe om maatregelen en subsidiekansen
-                per project te registreren.
-              </p>
-            </div>
-            <Link to="/projecten/nieuw" className="btn-primary">
-              + Project toevoegen
-            </Link>
-          </div>
-        ) : (
-          <ul className="divide-y divide-gray-100">
-            {projecten.slice(0, 4).map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
-                <EnergielabelBadge label={p.energielabel_huidig} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold text-gray-900">
-                    {p.straat} {p.huisnummer}, {p.plaats}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {projectTypeLabel(p.project_type)} · Bouwjaar {p.bouwjaar} ·{" "}
-                    {p.aantal_maatregelen} maatregel
-                    {p.aantal_maatregelen === 1 ? "" : "en"}
-                  </div>
-                </div>
-                <DeadlineBadge status={p.worst_deadline_status} />
+      {!noProjects && (
+        <>
+          <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 p-5">
+              <h2 className="text-lg font-bold text-gray-900">Mijn projecten</h2>
+              <div className="flex items-center gap-3 text-sm">
+                {projectenQuota && (
+                  <span className="hidden text-xs text-gray-500 sm:inline">
+                    {projectenQuota.used}
+                    {projectenQuota.limit !== null && ` / ${projectenQuota.limit}`}{" "}
+                    projecten
+                  </span>
+                )}
                 <Link
-                  to={`/projecten/${p.id}`}
-                  className="text-sm font-semibold text-brand-green hover:underline"
+                  to="/projecten/nieuw"
+                  className="font-semibold text-brand-green hover:underline"
                 >
-                  Bekijken →
+                  + Nieuw
                 </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-100 p-5">
-          <h2 className="text-lg font-bold text-gray-900">Recente aanvragen</h2>
-        </div>
-        {aanvragen.length === 0 ? (
-          <div className="grid place-items-center gap-4 px-5 py-12 text-center">
-            <div className="text-5xl" aria-hidden>
-              📋
+                <Link
+                  to="/projecten"
+                  className="font-semibold text-brand-green hover:underline"
+                >
+                  Alles →
+                </Link>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">
-                U heeft nog geen aanvragen
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Start de subsidiecheck om te beginnen. In 5 stappen ziet u
-                welke regelingen op uw situatie van toepassing zijn.
+
+            {projectenQuota &&
+              projectenQuota.limit !== null &&
+              projectenQuota.remaining !== null &&
+              projectenQuota.remaining <= 1 &&
+              !projectenQuota.exceeded && (
+                <div className="border-b border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-900">
+                  U heeft nog{" "}
+                  <strong>
+                    {projectenQuota.remaining}{" "}
+                    {projectenQuota.remaining === 1 ? "project" : "projecten"}
+                  </strong>{" "}
+                  over in uw huidige plan.{" "}
+                  <Link
+                    to="/onboarding/plan"
+                    className="font-semibold underline hover:text-amber-950"
+                  >
+                    Upgrade voor meer projecten →
+                  </Link>
+                </div>
+              )}
+            <ul className="divide-y divide-gray-100">
+              {projecten.slice(0, 6).map((p) => (
+                <li
+                  key={p.id}
+                  className="flex flex-wrap items-center gap-4 px-5 py-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold text-gray-900">
+                      {p.straat} {p.huisnummer}, {p.plaats}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {p.aantal_maatregelen || 0} maatregel(en) · geschat{" "}
+                      {formatEuro(p.totaal_geschatte_subsidie || 0)}
+                      {p.heeft_open_upload_verzoek && (
+                        <span className="ml-2 font-semibold text-amber-700">
+                          · documenten nodig
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <Link
+                    to={`/projecten/${p.id}`}
+                    className="text-sm font-semibold text-brand-green hover:underline"
+                  >
+                    Openen →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="border-b border-gray-100 p-5">
+              <h2 className="text-lg font-bold text-gray-900">Recente activiteit</h2>
+              <p className="mt-1 text-xs text-gray-500">
+                Statusupdates, documentverzoeken en uw projecten.
               </p>
             </div>
-            <Link to="/subsidiecheck" className="btn-primary">
-              Start subsidiecheck
-            </Link>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
-                  <th className="px-5 py-3">Regeling</th>
-                  <th className="px-5 py-3">Maatregel</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Geschatte subsidie</th>
-                  <th className="px-5 py-3">Deadline</th>
-                  <th className="px-5 py-3 text-right">Actie</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((a) => (
-                  <tr
-                    key={a.id}
-                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
-                  >
-                    <td className="px-5 py-3">
-                      <RegelingBadge code={a.regeling} />
-                    </td>
-                    <td className="px-5 py-3 text-gray-700">
-                      {maatregelLabel(a.maatregel)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <StatusBadge status={a.status} />
-                    </td>
-                    <td className="px-5 py-3 font-semibold text-gray-900">
-                      {formatEuro(a.geschatte_subsidie)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <DeadlineCell datum={a.deadline_datum} />
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <Link
-                        to={`/aanvraag/${a.id}`}
-                        className="text-sm font-semibold text-brand-green hover:underline"
-                      >
-                        Bekijken →
-                      </Link>
-                    </td>
-                  </tr>
+            {activity.length === 0 ? (
+              <div className="px-5 py-10 text-center text-sm text-gray-500">
+                Nog geen activiteit om te tonen.
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {activity.map((row) => (
+                  <li key={row.key}>
+                    <Link
+                      to={row.href}
+                      className="flex flex-col gap-0.5 px-5 py-3 text-sm hover:bg-gray-50"
+                    >
+                      <span className="font-semibold text-gray-900">
+                        {row.label}
+                      </span>
+                      {row.sub && (
+                        <span className="line-clamp-2 text-xs text-gray-600">
+                          {row.sub}
+                        </span>
+                      )}
+                      <span className="text-[11px] text-gray-400">
+                        {formatDate(row.at)}
+                      </span>
+                    </Link>
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ul>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
