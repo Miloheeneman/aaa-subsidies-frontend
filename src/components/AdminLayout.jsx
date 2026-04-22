@@ -44,7 +44,7 @@ export default function AdminLayout() {
               <img
                 src="/aaa-subsidies-logo.svg"
                 alt="AAA-Subsidies"
-                className="h-10 w-auto brightness-0 invert"
+                className="h-[52px] w-auto"
               />
               <span className="hidden text-xs font-bold uppercase tracking-wider text-white/90 sm:inline">
                 Admin
